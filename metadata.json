@@ -1,0 +1,6 @@
+{
+  "name": "Halal Damu Bot",
+  "description": "Halal Damu мекемелері мен өнімдерін тексеруге арналған ресми Telegram ботты басқару жүйесі. AI көмегімен суреттерді тану және халал ақпаратты іздеу функцияларымен қамтылған.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
