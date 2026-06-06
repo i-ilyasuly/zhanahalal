@@ -27,7 +27,7 @@ import { runSync } from "./src/server/scripts/sync_companies.js";
 
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT || 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Load Firestore Data into Memory (Non-blocking)
   loadCache().then(() => {
@@ -49,7 +49,7 @@ async function startServer() {
   });
 
   // Start Telegram Bot Polling
-  if (process.env.BOT_TOKEN) {
+  if (process.env.BOT_TOKEN && process.env.DISABLE_BOT_POLLING !== "true") {
     console.log(`📡 Attempting to launch Telegram Bot (Token length: ${process.env.BOT_TOKEN.length})...`);
     bot.launch({ dropPendingUpdates: true }).then(() => {
       console.log("✅✅✅ Telegram Bot started via long-polling.");
@@ -57,8 +57,14 @@ async function startServer() {
     }).then((me) => {
       console.log(`🤖 Bot identity confirmed: @${me.username} (${me.id})`);
     }).catch(e => {
-      console.error("❌❌❌ Telegram bot failed to launch:", e);
+      if (e.message && e.message.includes("409")) {
+        console.warn("\n⚠️⚠️⚠️ [TELEGRAM CONFLICT 409] ⚠️⚠️⚠️\nБотты іске қосу барысында 409 (Conflict) қатесі шықты. Бұл дегеніміз - дәл осы Token-мен басқа серверде немесе Cloud Run-да боттың тағы бір нұсқасы қатар жұмыс істеп тұр.\nTelegram бір уақытта тек БІР ҒАНА бот нұсқасына хабарлама алуға (polling) рұқсат береді. Оларды ажырату немесе тоқтату қажет.\nБаптаулардан 'DISABLE_BOT_POLLING=true' айнымалысын қосу арқылы бұл ортадағы боттың жұмысын тоқтата аласыз.\n");
+      } else {
+        console.error("❌❌❌ Telegram bot failed to launch:", e);
+      }
     });
+  } else if (process.env.DISABLE_BOT_POLLING === "true") {
+    console.log("⏳ Telegram Bot polling is explicitly DISABLED via DISABLE_BOT_POLLING environment variable.");
   } else {
     console.error("⚠️ BOT_TOKEN not found in process.env!");
   }
