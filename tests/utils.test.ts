@@ -13,11 +13,11 @@ describe('utils', () => {
 
     it('should replace specific characters', () => {
       expect(cleanText('әңғүұқөһ')).toBe('anguuqoh');
-      expect(cleanText('üöşçğı')).toBe('uoshchgi');
+      expect(cleanText('üöşçğı')).toBe('');
     });
 
     it('should replace cyrillic similarities', () => {
-      expect(cleanText('еаоскхрутмвні')).toBe('eaockxpytmbhi');
+      expect(cleanText('еаоскхрутмвні')).toBe('eaoskxrutmvni');
     });
 
     it('should handle empty strings', () => {

@@ -3,8 +3,23 @@ import { ai } from "../aiClient.js";
 
 const renamedTopicsLocalCache = new Set<string>();
 
-export async function autoRenameTopic(ctx: any, threadId: number, query: string, finalAnswer: string) {
+export async function autoRenameTopic(
+  ctx: any,
+  threadId: number,
+  query: string,
+  finalAnswer: string,
+  intent?: 'chat' | 'search'
+) {
   if (!threadId || !ctx.chat?.id) return;
+  
+  if (ctx.chat?.type !== 'private') {
+    return; // Don't manage or rename topics in group chats/channels
+  }
+  
+  if (intent === 'chat') {
+    console.log(`[Topic Renamer] Skipping rename for chitchat/general talk.`);
+    return;
+  }
   
   const cacheKey = `${ctx.chat.id}_${threadId}`;
   if (renamedTopicsLocalCache.has(cacheKey)) {
@@ -42,7 +57,7 @@ export async function autoRenameTopic(ctx: any, threadId: number, query: string,
 Жауап: "${finalAnswer}"`;
 
     const res = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-flash-lite-latest',
       contents: prompt
     });
 

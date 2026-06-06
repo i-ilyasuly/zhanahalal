@@ -2,16 +2,27 @@ import { describe, it, expect, vi } from 'vitest';
 
 // Create the mock before any imports that use it
 vi.mock('@google/genai', () => {
+    const mockModelFn = vi.fn().mockImplementation(async (req) => {
+        if (req.model === 'gemini-flash-lite-latest' && typeof req.contents === 'string') {
+            return { text: 'Mocked Food' };
+        } else if (req.config?.responseMimeType === 'application/json') {
+            return { text: '{"product_names": ["Mock KFC", "Mock Burger"]}' };
+        }
+        return { text: 'Fallback' };
+    });
     return {
         GoogleGenAI: class {
             models = {
-                generateContent: vi.fn().mockImplementation(async (req) => {
-                    if (req.model === 'gemini-3-flash-preview' && typeof req.contents === 'string') {
-                        return { text: 'Mocked Food' };
-                    } else if (req.config?.responseMimeType === 'application/json') {
-                        return { text: '{"product_names": ["Mock KFC", "Mock Burger"]}' };
-                    }
-                    return { text: 'Fallback' };
+                generateContent: mockModelFn,
+                generateContentStream: vi.fn().mockImplementation(async () => {
+                    return {
+                        async *[Symbol.asyncIterator]() {
+                            yield { text: 'Fallback Stream' };
+                        }
+                    };
+                }),
+                embedContent: vi.fn().mockImplementation(async () => {
+                    return { embedding: { values: [0.1, 0.2] } };
                 })
             };
         }

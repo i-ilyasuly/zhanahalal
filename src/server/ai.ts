@@ -37,7 +37,7 @@ export async function extractSearchTerm(text: string): Promise<string | null> {
   try {
     const ai = getAI();
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-flash-lite-latest",
       contents: prompt,
     });
     const result = response.text ? response.text.trim().replace(/^["']|["']$/g, "").trim() : "";
@@ -92,7 +92,7 @@ Pайдаланушы өнім немесе мекеме іздеді, біра�
   try {
     const ai = getAI();
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-flash-lite-latest",
       contents: prompt,
     });
     return response.text ? response.text.trim() : "";
@@ -137,7 +137,7 @@ export async function analyzeImageBase64(base64Image: string): Promise<string> {
   try {
     const ai = getAI();
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-flash-lite-latest",
       contents: {
         parts: [
           { inlineData: { mimeType: "image/jpeg", data: base64Image } },
@@ -241,7 +241,7 @@ query өрісінен НЕ алып тастау керек:
   try {
     const ai = getAI();
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-flash-lite-latest",
       contents: prompt,
       config: {
         responseMimeType: "application/json"
@@ -373,7 +373,7 @@ export async function chatWithAI(userId: number, text: string, isSymbat: boolean
     ];
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-flash-lite-latest",
       contents,
     });
 
@@ -503,7 +503,7 @@ export async function* chatWithAIStream(userId: number, text: string, isSymbat: 
     ];
 
     const responseStream = await ai.models.generateContentStream({
-      model: "gemini-3.5-flash",
+      model: "gemini-flash-lite-latest",
       contents,
     });
 

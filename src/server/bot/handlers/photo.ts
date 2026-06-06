@@ -1,15 +1,30 @@
 import { Markup } from "telegraf";
 import { MyContext } from "../types.js";
-import { executeAgenticImageSearch, streamTextToTelegram } from "../../agenticImageSearch.js";
+import { executeAgenticImageSearch } from "../../agenticImageSearch.js";
+import { streamTextToTelegram } from "../streamUtils.js";
 import { getQuoteCategory, formatDetailMessage } from "../../search.js";
 import { getQuote } from "../../quotes.js";
 import { sendResultWithPhoto, sendSearchPage } from "../helpers.js";
+import { autoRenameTopic } from "../topicRenamer.js";
 
 export async function handlePhotoMessage(ctx: MyContext) {
   if (!ctx.message || !('photo' in ctx.message)) return;
 
   try {
-    const processingMsg = await ctx.reply("📷 Суретті жасанды интеллект талдауда...");
+    const threadId = ctx.message.message_thread_id;
+    const draftId = ctx.message.message_id || Math.floor(Math.random() * 100000) + 1;
+    
+    if (ctx.chat?.type === 'private') {
+      await ctx.telegram.callApi('sendMessageDraft' as any, {
+        chat_id: ctx.chat.id,
+        message_thread_id: threadId,
+        draft_id: draftId,
+        text: ""
+      }).catch(() => {});
+    } else {
+      await ctx.sendChatAction("typing").catch(() => {});
+    }
+
     const photo = ctx.message.photo[ctx.message.photo.length - 1];
     const fileId = photo.file_id;
     const fileUrl = await ctx.telegram.getFileLink(fileId);
@@ -19,19 +34,30 @@ export async function handlePhotoMessage(ctx: MyContext) {
     const buffer = Buffer.from(arrayBuffer);
     const base64Image = buffer.toString('base64');
 
-    const result = await executeAgenticImageSearch(ctx, base64Image, processingMsg.message_id);
+    const result = await executeAgenticImageSearch(ctx, base64Image, draftId);
 
     if (!result || !result.success) {
-      await ctx.deleteMessage(processingMsg.message_id).catch(() => {});
-      await ctx.reply("😔 Кешіріңіз, суретті талдау кезінде қате кетті. Тағы да көріңіз.");
+      await ctx.reply("😔 Кешіріңіз, суретті талдау кезінде қате кетті. Тағы да көріңіз.", { message_thread_id: threadId });
       return;
     }
 
+
     const { finalAnswer, matchedCompanies, matchedIngredients } = result;
+
+    if (ctx.message.message_thread_id) {
+      let subj = "📷 Суретті талдау";
+      if (matchedCompanies.length > 0) {
+        subj = matchedCompanies[0].title;
+      } else if (matchedIngredients.length > 0) {
+        subj = matchedIngredients[0].code || "Е-код қоспасы";
+      }
+      autoRenameTopic(ctx, ctx.message.message_thread_id, subj, finalAnswer, 'search').catch(console.error);
+    }
 
     if (matchedCompanies.length === 0 && matchedIngredients.length === 0) {
       // Direct conversational response from Agent (no concrete db references)
-      await streamTextToTelegram(ctx, processingMsg.message_id, finalAnswer, "🤖 <b>Агент талдауы:</b>");
+      await streamTextToTelegram(ctx, draftId, finalAnswer);
+      await ctx.reply(finalAnswer, { parse_mode: 'HTML', message_thread_id: threadId });
       return;
     }
 
@@ -41,11 +67,11 @@ export async function handlePhotoMessage(ctx: MyContext) {
       const quote = getQuote(getQuoteCategory(company));
       const detailsText = formatDetailMessage(company) + quote;
 
-      // Stream conversational commentary first into the processing message
-      await streamTextToTelegram(ctx, processingMsg.message_id, finalAnswer, "🤖 <b>Агент қорытындысы:</b>");
+      // Stream the card text directly!
+      await streamTextToTelegram(ctx, draftId, detailsText);
       
       // Send the beautiful photo/card separately
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 500));
       await sendResultWithPhoto(ctx, company, detailsText);
     } 
     else if (matchedCompanies.length > 1) {
@@ -54,11 +80,11 @@ export async function handlePhotoMessage(ctx: MyContext) {
       ctx.session.searchSubject = matchedCompanies[0].title;
       ctx.session.isPhoto = true;
 
-      // Stream the conversational reasoning
-      await streamTextToTelegram(ctx, processingMsg.message_id, finalAnswer, "🤖 <b>Агент талдауы:</b>");
+      const replyInfo = `Суреттен «${matchedCompanies[0].title}» бойынша бірнеше мекеме табылды (${matchedCompanies.length}). Тізім дайындалуда...`;
+      await streamTextToTelegram(ctx, draftId, replyInfo);
       
       // Delay briefly then print the search menu
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 500));
       await sendSearchPage(ctx, 0, true, matchedCompanies[0].title);
     } 
     else if (matchedIngredients.length > 0) {
@@ -74,19 +100,16 @@ export async function handlePhotoMessage(ctx: MyContext) {
          rows.push(detailButtons.slice(i, i + 2));
       }
 
-      // Stream the conversational analysis first
-      await streamTextToTelegram(ctx, processingMsg.message_id, finalAnswer, "🤖 <b>Агент талдауы:</b>");
+      const ingText = `🔍 Суреттен ${matchedIngredients.length} тағамдық қоспа табылды.\n\n💬 <i>Төмендегі батырмалар арқылы қоспалардың толық анықтамалығын оқыңыз:</i>`;
+      await streamTextToTelegram(ctx, draftId, ingText);
 
-      // Attach the inline keyboard directly to that streamed message! Clean, zero noise!
       await new Promise(resolve => setTimeout(resolve, 500));
-      await ctx.telegram.editMessageText(
-        ctx.chat.id,
-        processingMsg.message_id,
-        undefined,
-        `🤖 <b>Агент талдауы:</b>\n\n${finalAnswer}\n\n💬 <i>Төмендегі батырмалар арқылы қоспалардың толық анықтамалығын оқыңыз:</i>`,
+      await ctx.reply(
+        ingText,
         {
           parse_mode: 'HTML',
-          reply_markup: Markup.inlineKeyboard(rows).reply_markup
+          reply_markup: Markup.inlineKeyboard(rows).reply_markup,
+          message_thread_id: threadId
         }
       ).catch(console.error);
     }

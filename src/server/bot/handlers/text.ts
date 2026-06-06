@@ -6,16 +6,26 @@ import { sendResultWithPhoto, sendSearchPage } from "../helpers.js";
 import { autoRenameTopic } from "../topicRenamer.js";
 import { shouldClassify, classifyQuery } from "../classifier.js";
 import { chatWithAI, getNotFoundReply } from "../aiChat.js";
+import { getQuote } from "../../quotes.js";
+import { streamTextToTelegram } from "../streamUtils.js";
 
 export async function handleTextMessage(ctx: MyContext) {
-  const query = ctx.message && ('text' in ctx.message) ? ctx.message.text : "";
+  let query = ctx.message && ('text' in ctx.message) ? ctx.message.text : "";
+  if (!query) return;
+
+  // Clean up bot mentions (e.g. @HalalDamu_bot) from the query text for clean searching & AI processing
+  if (ctx.botInfo?.username) {
+    const mentionRegex = new RegExp(`@${ctx.botInfo.username}`, 'gi');
+    query = query.replace(mentionRegex, "").trim();
+  }
   if (!query) return;
 
   if (query === "📍 Айналадағы халал мекемелер") {
     return ctx.reply(
       "📍 Айналадағы халал мекемелерді іздеу үшін ұялы телефоннан осы батырманы басыңыз немесе өз орналасқан жеріңізді (Location) жіберіңіз.\n\nКоманда: /start батырманы қайта шығару үшін.",
       Markup.keyboard([
-        Markup.button.locationRequest("📍 Айналадағы халал мекемелер")
+        [Markup.button.locationRequest("📍 Менің орнымды жіберу")],
+        ["📍 Айналадағы халал мекемелер"]
       ]).resize()
     );
   }
@@ -24,67 +34,54 @@ export async function handleTextMessage(ctx: MyContext) {
   const userId = ctx.from?.id || 0;
   const isSymbat = userId === 1042456426;
 
-  const draftId = ctx.message?.message_id || Date.now();
   const threadId = ctx.message?.message_thread_id;
+  const draftId = ctx.message?.message_id || Math.floor(Math.random() * 100000) + 1;
   
-  ctx.sendChatAction("typing").catch(() => {});
+  // Immediately show "Thinking..." indicator
+  if (ctx.chat?.type === 'private') {
+    await ctx.telegram.callApi('sendMessageDraft' as any, {
+      chat_id: ctx.chat.id,
+      message_thread_id: threadId,
+      draft_id: draftId,
+      text: ""
+    }).catch(() => {});
+  } else {
+    await ctx.sendChatAction("typing").catch(() => {});
+  }
   
-  (ctx.telegram as any).callApi('sendMessageDraft', {
-    chat_id: ctx.chat?.id,
-    draft_id: draftId,
-    message_thread_id: threadId,
-    text: '⏳ <i>Жауап іздеуде...</i>',
-    parse_mode: 'HTML'
-  }).catch(() => {});
-
-  const clearDraft = () => {
-    if (draftId) {
-      (ctx.telegram as any).callApi('sendMessageDraft', {
-        chat_id: ctx.chat?.id,
-        draft_id: draftId.toString(),
-        text: ''
-      }).catch(() => {});
-    }
-  };
-
   saveChatHistory(userId, 'user', query, threadId).catch(console.error);
 
   try {
     let searchQuery = query;
     let goToChat = false;
+    let chatReply = "";
 
     if (shouldClassify(query)) {
-      const { action, query: extractedQuery } = await classifyQuery(query);
+      const { action, query: extractedQuery, reply: classifierReply } = await classifyQuery(query, isSymbat);
       if (action === "chat") {
         goToChat = true;
+        chatReply = classifierReply;
       } else if (extractedQuery) {
         searchQuery = extractedQuery;
       }
     }
 
     if (goToChat) {
-      const aiReply = await chatWithAI(query, isSymbat);
+      const aiReply = chatReply || await chatWithAI(query, isSymbat);
       await saveChatHistory(userId, 'model', aiReply, threadId).catch(console.error);
       
       if (threadId) {
-        autoRenameTopic(ctx, threadId, query, aiReply).catch(console.error);
+        autoRenameTopic(ctx, threadId, query, aiReply, 'chat').catch(console.error);
       }
       
-      const extra: any = {
-        parse_mode: 'HTML' as const,
-        reply_markup: Markup.inlineKeyboard([
-          { text: "👍 Пайдалы", callback_data: "fb_good_ai", style: "success" } as any,
-          { text: "👎 Қате", callback_data: "fb_bad_ai", style: "danger" } as any
-        ]).reply_markup,
-        reply_parameters: { message_id: ctx.message?.message_id }
-      };
+      await streamTextToTelegram(ctx, draftId, aiReply);
 
-      if (threadId !== undefined) {
-        extra.message_thread_id = threadId;
-      }
-
-      await ctx.reply(aiReply, extra);
-      clearDraft();
+      await ctx.reply(aiReply, {
+        parse_mode: 'HTML',
+        reply_parameters: { message_id: ctx.message?.message_id },
+        message_thread_id: threadId
+      }).catch(console.error);
+      
       return;
     }
 
@@ -98,27 +95,34 @@ export async function handleTextMessage(ctx: MyContext) {
 
       if (allItems.length === 1) {
         const item = allItems[0];
-        const formattedText = formatDetailMessage(item);
+        const quote = getQuote(getQuoteCategory(item));
+        const formattedText = formatDetailMessage(item) + quote;
         
         // Append fuzzy note if applicable
         const finalText = item.confidence === 'fuzzy' 
           ? `⚠️ <i>Бұл сіз іздегенге ең ұқсас нәтиже:</i>\n\n${formattedText}`
           : formattedText;
 
+        // Stream the text first for an organic feel
+        await streamTextToTelegram(ctx, draftId, finalText);
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         await sendResultWithPhoto(ctx, item, finalText);
         await saveChatHistory(userId, 'model', finalText, threadId).catch(console.error);
         if (threadId) {
-          autoRenameTopic(ctx, threadId, query, finalText).catch(console.error);
+          autoRenameTopic(ctx, threadId, query, finalText, 'search').catch(console.error);
         }
       } else {
         ctx.session = { lastResults: allItems, searchSubject: searchQuery, isPhoto: false };
+        const replyInfo = `«${searchQuery}» бойынша бірнеше мекеме табылды (${allItems.length}). Тізім дайындалуда...`;
+        await streamTextToTelegram(ctx, draftId, replyInfo);
+        await new Promise(resolve => setTimeout(resolve, 300));
         await sendSearchPage(ctx, 0, false, searchQuery, undefined);
-        await saveChatHistory(userId, 'model', `Көп нәтиже табылды (${allItems.length})`, threadId).catch(console.error);
+        await saveChatHistory(userId, 'model', replyInfo, threadId).catch(console.error);
         if (threadId) {
-          autoRenameTopic(ctx, threadId, query, `Бәлкім сіз мына мекемелерді іздеген боларсыз: ${searchQuery}`).catch(console.error);
+          autoRenameTopic(ctx, threadId, query, replyInfo, 'search').catch(console.error);
         }
       }
-      clearDraft();
       return;
     }
 
@@ -127,27 +131,23 @@ export async function handleTextMessage(ctx: MyContext) {
     
     await saveChatHistory(userId, 'model', notFoundReply, threadId).catch(console.error);
     if (threadId) {
-      autoRenameTopic(ctx, threadId, query, notFoundReply).catch(console.error);
+      autoRenameTopic(ctx, threadId, query, notFoundReply, 'search').catch(console.error);
     }
     
-    const extra: any = {
-      parse_mode: 'HTML' as const,
-      reply_parameters: { message_id: ctx.message?.message_id }
-    };
+    await streamTextToTelegram(ctx, draftId, notFoundReply);
 
-    if (threadId !== undefined) {
-      extra.message_thread_id = threadId;
-    }
-
-    await ctx.reply(notFoundReply, extra);
-    clearDraft();
+    await ctx.reply(notFoundReply, {
+      parse_mode: 'HTML',
+      reply_parameters: { message_id: ctx.message?.message_id },
+      message_thread_id: threadId
+    }).catch(console.error);
+    
     
   } catch (err: any) {
     console.error("Text handling error:", err);
     await ctx.reply("😔 Сұранысты өңдеу кезінде қате кетті. Сәл күте тұрып қайталап көріңіз.", {
       message_thread_id: threadId
     }).catch(() => {});
-    clearDraft();
   }
 }
 

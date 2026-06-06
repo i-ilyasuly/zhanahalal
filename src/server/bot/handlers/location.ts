@@ -1,6 +1,7 @@
 import { MyContext } from "../types.js";
 import { findNearbyCompanies } from "../../search.js";
 import { sendNearbyPage } from "../helpers.js";
+import { autoRenameTopic } from "../topicRenamer.js";
 
 export async function handleLocationMessage(ctx: MyContext) {
   if (!ctx.message || !('location' in ctx.message)) return;
@@ -16,7 +17,26 @@ export async function handleLocationMessage(ctx: MyContext) {
     await ctx.deleteMessage(processingMsg.message_id).catch(() => {});
 
     if (nearby.length === 0) {
+      if (ctx.message.message_thread_id) {
+        autoRenameTopic(
+          ctx,
+          ctx.message.message_thread_id,
+          "📍 Айналадағы жақын орындар",
+          "Пайдаланушы орналасқан жерін жіберді, бірақ 10 км радиуста ешқандай халал мекеме табылмады.",
+          'search'
+        ).catch(console.error);
+      }
       return ctx.reply("Кешіріңіз, 10 км радиуста халал мекемелер табылдамады.");
+    }
+
+    if (ctx.message.message_thread_id) {
+      autoRenameTopic(
+        ctx,
+        ctx.message.message_thread_id,
+        "📍 Айналадағы жақын орындар",
+        `Пайдаланушы орналасқан жерін жіберді. Маңынан 10 км радиустағы халал кафелер мен мейрамханалар ізделді. Барлығы ${nearby.length} мекеме табылды.`,
+        'search'
+      ).catch(console.error);
     }
 
     await sendNearbyPage(ctx, 0);

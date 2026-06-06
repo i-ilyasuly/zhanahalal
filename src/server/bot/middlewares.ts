@@ -67,7 +67,8 @@ export const businessMessageMiddleware: Middleware<MyContext> = (ctx, next) => {
         tg.callApi = function(method: string, data: any, ...rest: any[]) {
           const sendMethods = [
             'sendMessage', 'sendPhoto', 'sendLocation', 'sendDocument', 'sendAudio',
-            'sendVideo', 'sendVoice', 'sendVenue', 'sendContact', 'sendPoll', 'sendDice'
+            'sendVideo', 'sendVoice', 'sendVenue', 'sendContact', 'sendPoll', 'sendDice',
+            'sendMessageDraft'
           ];
           if (sendMethods.includes(method) && data && typeof data === 'object') {
             if (data.chat_id === ctx.chat?.id && data.business_connection_id === undefined) {
@@ -85,76 +86,46 @@ export const businessMessageMiddleware: Middleware<MyContext> = (ctx, next) => {
 // Auto Forum Topic Spawner Middleware
 // Creates a separate conversation thread (forum topic) for every new question/query initiated in the General topic
 export const autoForumTopicMiddleware: Middleware<MyContext> = async (ctx, next) => {
-  // If ordinary group (not supergroup), politely warn about topic activation requirements:
-  if (ctx.chat?.type === 'group' && ctx.message) {
-    const isCommand = (ctx.message as any).text?.startsWith('/');
-    if (!isCommand) {
-      await ctx.reply("⚠️ Бұл топта тақырыптарды (topics) автоматты түрде құру мүмкін емес, себебі бұл қарапайым топ. Тақырыптарды белсендіру үшін топ баптауларынан топты супертопқа (supergroup) ауыстырыңыз, 'Тақырыптарды' баптаулардан қосыңыз және ботты топ админі қылып, 'Тақырыптарды басқару' (Manage Topics/Forum) құқығын беріңіз.").catch(console.error);
-    }
-  }
+  // Disabled per user instruct - do not spawn separate/new forum topics in group chats
+  return next();
+};
 
-  if (ctx.chat?.type === 'supergroup' && ctx.message) {
-    const msg = ctx.message as any;
-    const threadId = msg.message_thread_id;
-    // General topic is undefined or 1
-    const isGeneralOrNoThread = threadId === undefined || threadId === 1;
+// Filter messages in group chats to only respond if the bot is mentioned or replied to
+export const groupMentionFilterMiddleware: Middleware<MyContext> = async (ctx, next) => {
+  const chatType = ctx.chat?.type;
+  if (chatType && chatType !== 'private') {
+    if (ctx.message) {
+      const msg = ctx.message as any;
+      const botUsername = ctx.botInfo?.username;
+      const botId = ctx.botInfo?.id;
 
-    if (isGeneralOrNoThread) {
-      const isCommand = msg.text?.startsWith('/');
-      if (!isCommand) {
-        let queryText = msg.text || "";
-        let topicName = "Жаңа сұраныс";
+      let isTriggered = false;
 
-        if (queryText) {
-          topicName = queryText.length > 30 ? queryText.slice(0, 27) + "..." : queryText;
-        } else if (msg.photo) {
-          topicName = "📸 Фото талдау";
-        } else if (msg.location) {
-          topicName = "📍 Картамен іздеу";
+      // 1. Check if the message is a reply to the bot's message
+      if (botId && msg.reply_to_message?.from?.id === botId) {
+        isTriggered = true;
+      }
+
+      // 2. Check if the message mentions the bot via text/caption
+      if (!isTriggered && botUsername) {
+        const text = msg.text || msg.caption || "";
+        const mention = `@${botUsername}`;
+        if (text.toLowerCase().includes(mention.toLowerCase())) {
+          isTriggered = true;
         }
+      }
 
-        try {
-          // Attempt topic creation
-          const topic = await ctx.telegram.createForumTopic(ctx.chat.id, topicName);
-          const targetThreadId = topic.message_thread_id;
-
-          // Forward the user's original message inside the newly spawned topic to initiate context
-          await ctx.telegram.forwardMessage(ctx.chat.id, ctx.chat.id, msg.message_id, {
-            message_thread_id: targetThreadId
-          }).catch(err => console.error("Could not forward original message to new topic thread:", err));
-
-          // Build link to the new topic
-          const chatLink = ctx.chat.username
-            ? `https://t.me/${ctx.chat.username}/${targetThreadId}`
-            : `https://t.me/c/${String(ctx.chat.id).replace('-100', '')}/${targetThreadId}`;
-
-          const optParams: any = {
-            parse_mode: 'HTML',
-            reply_markup: Markup.inlineKeyboard([
-              { text: "Соңғы тақырыпқа өту ➡️", url: chatLink, style: "primary" } as any
-            ]).reply_markup
-          };
-          
-          if (threadId !== undefined) {
-            optParams.message_thread_id = threadId;
-          }
-
-          // Reply in General topic (using original threadId) with redirect button
-          await ctx.telegram.sendMessage(ctx.chat.id, `<b>«${escapeHTML(topicName)}»</b> тақырыбы құрылды. Жауап сонда дайындалуда...`, optParams);
-
-          // Inject the target thread ID into the current update so future handles target this new topic
-          msg.message_thread_id = targetThreadId;
-        } catch (err: any) {
-          console.error("Failed to create forum topic:", err);
-          
-          const errorMsg = `⚠️ <b>Жаңа тақырып (Forum Topic) құру мүмкін болмады.</b>\nӨтініш, боттың топтағы админ құқықтарын, соның ішінде <b>'Тақырыптарды басқару' (Manage Topics/Forum)</b> рұқсатының қосылғанын тексеріңіз.`;
-          
-          const optParams: any = { parse_mode: 'HTML' };
-          if (threadId !== undefined) {
-            optParams.message_thread_id = threadId;
-          }
-          await ctx.telegram.sendMessage(ctx.chat.id, errorMsg, optParams).catch(console.error);
+      // 3. Check for specific commands targeted at this bot (e.g., /start@BotUsername)
+      if (!isTriggered && botUsername && msg.text) {
+        const commandMatch = msg.text.match(/^\/([a-zA-Z0-9_]+)(@([a-zA-Z0-9_]+))?/);
+        if (commandMatch && commandMatch[3] && commandMatch[3].toLowerCase() === botUsername.toLowerCase()) {
+          isTriggered = true;
         }
+      }
+
+      // If in a non-private chat and bot was not mentioned or replied to, ignore the update completely
+      if (!isTriggered) {
+        return;
       }
     }
   }

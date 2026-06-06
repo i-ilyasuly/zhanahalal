@@ -3,6 +3,7 @@ import { MyContext } from "./bot/types.js";
 import { 
   sessionSafetyMiddleware, 
   businessMessageMiddleware,
+  groupMentionFilterMiddleware,
   autoForumTopicMiddleware,
   forumTopicMiddleware, 
   trackingMiddleware 
@@ -52,6 +53,7 @@ bot.catch((err, ctx) => {
 bot.use(session());
 bot.use(sessionSafetyMiddleware);
 bot.use(businessMessageMiddleware);
+bot.use(groupMentionFilterMiddleware);
 bot.use(autoForumTopicMiddleware);
 bot.use(forumTopicMiddleware);
 bot.use(trackingMiddleware);
@@ -61,7 +63,8 @@ bot.start((ctx) => {
   ctx.reply(
     "Ассалаумағалейкум! Бұл Halal Damu боты. Өнімнің немесе қоспаның атын жазыңыз немесе суретін жіберіңіз.",
     Markup.keyboard([
-      Markup.button.locationRequest("📍 Айналадағы халал мекемелер")
+      [Markup.button.locationRequest("📍 Менің орнымды жіберу")],
+      ["📍 Айналадағы халал мекемелер"]
     ]).resize()
   );
 });

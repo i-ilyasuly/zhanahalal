@@ -200,7 +200,7 @@ async function startServer() {
       res.flushHeaders();
 
       const responseStream = await ai.models.generateContentStream({
-        model: "gemini-3.5-flash",
+        model: "gemini-flash-lite-latest",
         contents,
       });
 

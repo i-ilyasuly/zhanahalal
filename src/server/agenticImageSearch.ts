@@ -217,101 +217,6 @@ export function cleanupMarkdownToHTML(text: string): string {
   return cleaned;
 }
 
-/**
- * Emulates real-time streaming to Telegram using progressive message edits,
- * trying native sendMessageDraft first (Bot API 9.3) and falling back gracefully.
- */
-export async function streamTextToTelegram(ctx: any, initialMessageId: number, fullText: string, prefixText: string = ""): Promise<void> {
-  const words = fullText.split(/\s+/);
-  
-  // For extremely short messages, just update once and return
-  if (words.length <= 8) {
-    const finalContent = prefixText ? `${prefixText}\n\n${fullText}` : fullText;
-    const closedFinalContent = closeHTMLTags(finalContent);
-    
-    let sentViaDraft = false;
-    try {
-      await ctx.telegram.callApi('sendMessageDraft', {
-        chat_id: ctx.chat.id,
-        draft_id: `draft_${initialMessageId}`,
-        text: closedFinalContent,
-        parse_mode: 'HTML'
-      });
-      sentViaDraft = true;
-    } catch (e) {
-      // Graceful fallback to editMessageText
-    }
-
-    if (!sentViaDraft) {
-      await ctx.telegram.editMessageText(
-        ctx.chat.id,
-        initialMessageId,
-        undefined,
-        closedFinalContent,
-        { parse_mode: 'HTML' }
-      ).catch(console.error);
-    }
-    return;
-  }
-
-  // Create progressive parts
-  const parts: string[] = [];
-  const wordsPerChunk = 6; // smaller chunk size for incredibly smooth streaming sensation
-  for (let i = 0; i < words.length; i += wordsPerChunk) {
-    parts.push(words.slice(0, i + wordsPerChunk).join(" "));
-  }
-
-  // Guarantee the final block has the exact complete cleaned text
-  if (parts.length === 0 || parts[parts.length - 1] !== fullText) {
-    parts.push(fullText);
-  }
-
-  let useDraft = true; // Flag to track if native sendMessageDraft works
-  const draftId = `draft_${initialMessageId}`;
-
-  for (let i = 0; i < parts.length; i++) {
-    const isLast = i === parts.length - 1;
-    const body = parts[i];
-    const suffix = isLast ? "" : "\n\n✍️ <i>Агент жауап жазуда...</i>";
-    const content = prefixText ? `${prefixText}\n\n${body}${suffix}` : `${body}${suffix}`;
-    const safeContent = closeHTMLTags(content);
-
-    let editSuccessful = false;
-
-    if (useDraft) {
-      try {
-        await ctx.telegram.callApi('sendMessageDraft', {
-          chat_id: ctx.chat.id,
-          draft_id: draftId,
-          text: safeContent,
-          parse_mode: 'HTML'
-        });
-        editSuccessful = true;
-      } catch (err: any) {
-        // Safe logger
-        console.warn("⚠️ native sendMessageDraft failed, falling back to editMessageText.", err.message || err);
-        useDraft = false; // Disable draft mode for subsequent iterations of this stream
-      }
-    }
-
-    // Fallback path
-    if (!editSuccessful) {
-      await ctx.telegram.editMessageText(
-        ctx.chat.id,
-        initialMessageId,
-        undefined,
-        safeContent,
-        { parse_mode: 'HTML' }
-      ).catch((e: any) => {
-        console.error("⚠️ editMessageText failed during streaming:", e.message || e);
-      });
-    }
-
-    if (!isLast) {
-      await new Promise(resolve => setTimeout(resolve, 600)); // smooth stream interval
-    }
-  }
-}
 
 export interface AgenticImageSearchResult {
   success: boolean;
@@ -323,121 +228,112 @@ export interface AgenticImageSearchResult {
 /**
  * Handles the fully agentic reasoning loop for image analysis
  */
-export async function executeAgenticImageSearch(ctx: any, base64Image: string, processingMsgId: number): Promise<AgenticImageSearchResult> {
+export async function executeAgenticImageSearch(ctx: any, base64Image: string, draftId: number): Promise<AgenticImageSearchResult> {
   try {
     const ai = getAI();
     const matchedItems: any[] = [];
+    const message_thread_id = ctx.message?.message_thread_id;
 
-    // Construct the initial message with the base64 image and detailed instructions
-    const systemInstruction = `Сен — Қазақстанның Halal Damu (ҚМДБ Халал) мекемелері мен өнімдерін және тағамдық қоспаларын (E-кодтарды) тексеретін, шешім қабылдайтын дербес «Agentic AI» көмекшісісің.
+    if (ctx.chat?.type === 'private') {
+      await ctx.telegram.callApi('sendMessageDraft' as any, {
+        chat_id: ctx.chat.id,
+        message_thread_id,
+        draft_id: draftId,
+        text: "🔍 <i>Сурет талдануда... Және деректер базасынан ізделуде...</i>",
+        parse_mode: 'HTML'
+      }).catch(() => {});
+    } else {
+      await ctx.sendChatAction("typing").catch(() => {});
+    }
 
-ПАЙДАЛАНУШЫ СУРЕТ ЖІБЕРДІ. СЕНІҢ ҚАДАМДАРЫҢ:
-1. Суретті мұқият талдап, өнімнің атын, брендін (мысалы, "Маслёнково", "Аяла" т.б.) және құрамынан Е-кодтар мен күдікті қоспаларды анықта.
-2. Суретті талдағаннан кейін тиісті құралдарды (tools/functions) шақырып базадан тексеру жүргіз:
-   - Егер өнімнің немесе компанияның атын тапсаң, 'searchDatabase' құралын шақыр.
-   - Егер суреттің сыртында құрамындағы Е-кодтар немесе қоспалар тізімі анықталса, 'getIngredientReport' құралын шақыр.
-3. Құралды шақырған соң қайтқан нәтижеге қарап шешім қабылда (Reasoning):
-   - Егер мекеме/өнім базамызда болса және сертификаты "active" болса, ХАЛАЛ екенін хабарла.
-   - Егер сертификат мерзімі өткен ("expired") немесе жойылған ("revoked"/"suspended") болса, ХАРАМ немесе СЕРТИФИКАТЫ ЖОҚ қауіпті екенін ескерт.
-   - Егер өнім базадан табылмаса, бірақ құрамынан ХАРАМ қоспа (мысалы, 'E120', кармин т.б.) тапсаң, немесе статусы 'mushbuh' (күдікті) қоспа тапсаң, жалпы өнім халал емес немесе күдікті болуы мүмкін екенін түсіндір.
-4. Шешімді пайдаланушыға көрнекі, таза, әдемі етіп және ТЕК ҚАЗАҚ ТІЛІНДЕ жаз.
-   МАҢЫЗДЫ: Телеграм терезесінде дұрыс форматталуы үшін ТЕК қана стандартты HTML тегтерін ( <b>, <i>, <code>, <pre>, <u>, <a> ) қолданып жаз. Мәтінді форматтау ережесі (ҚАТАҢ САҚТА): Жауап мәтінінде немесе Құран аудармасында сөздерді ерекшелеу үшін ешқашан қиғаш сызықтарды ( / сөз / ) немесе тік жақшаларды қолданба. Егер қандай да бір кілт сөзді немесе қосымша түсіндірмені ерекшелеу қажет болса, оны міндетті түрде тек HTML-дің қалың қаріп тегімен <b>сөз</b> деп қана жаз. Мәтін таза, әдемі және ешқандай артық символдарсыз табиғи оқылуы тиіс.
-   ЕШҚАНДАЙ Markdown белгілерін (#, ##, ###, **, *, \`\`, ___ ) немесе Markdown кестелерін қолдануға БОЛМАЙДЫ!
-   Мәтінді абзацтарға бөліп, көрнекі қылып жаз.
-5. Пайдаланушыға сенің дербес агент екеніңді көрсетіп, «<b>Агент әрекеттері:</b>» (мысалы, Маслёнково сұранысы бойынша база тексерілді, құрамындағы қоспалар талданды) деп қысқаша қорытынды жаз.`;
 
-    const contents: any[] = [
-      {
-        role: "user",
-        parts: [
-          {
-            inlineData: {
-              mimeType: "image/png",
-              data: base64Image
+    const systemInstruction = `Сен — Қазақстанның "Qazaqstan Halal Damu" (ҚМДБ Халал) ботының суреттерді талдау және өнімдерді, мекемелерді, Е-кодтарды анықтау жүйесісің.
+Суретті мұқият және өте жылдам қарап шығып, одан мекеме/бренд атауын және тағамдық қоспаларды (Е-кодтарын) тауып, ТЕК келесі JSON форматында жауап бер:
+
+{
+  "detected_brand": "анықталған негізгі мекеме немесе бренд немесе өнім атауы (мысалы, 'TABA NAN', 'KFC', 'Bahandi', 'Lay's', 'Snickers')",
+  "detected_ingredients": ["анықталған Е-кодтар немесе арнайы тағамдық қоспалар тізімі, мысалы: 'E471', 'E120', 'желатин'"],
+  "analysis_text": "сурет бойынша қысқаша қазақша талдау (1-2 сөйлем). Тек қалың қаріп (<b>), қиғаш қаріп (<i>) немесе код тегін (<code>) қолдан, HTML тегтерін әрқашан ашып-жауып жүр. Markdown белгілерін ешқашан қолданба!"
+}
+
+Осы көрнекі JSON форматынан басқа ешбір артық мәтінді қайтарма. JSON валидті болуы тиіс.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-flash-lite-latest",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                mimeType: "image/png",
+                data: base64Image
+              }
+            },
+            {
+              text: "Суреттегі өнімді, брендті немесе құрамындағы Е-кодтарды анықта."
             }
-          },
-          {
-            text: "Мына суреттегі өнімді базадан тауып, жан-жақты талдап бер."
+          ]
+        }
+      ],
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json"
+      }
+    });
+
+    let raw = response.text?.trim() || "{}";
+    raw = raw.replace(/```json\s*/, '').replace(/```\s*/, '').trim();
+    
+    let result: any = {};
+    try {
+      result = JSON.parse(raw);
+    } catch (parseErr) {
+      console.warn("⚠️ JSON parsing failed for image search, trying fallback regex", parseErr);
+      const brandMatch = raw.match(/"detected_brand"\s*:\s*"([^"]+)"/);
+      const brand = brandMatch ? brandMatch[1] : "";
+      result = { detected_brand: brand, detected_ingredients: [], analysis_text: "" };
+    }
+
+    const brand = result.detected_brand ? result.detected_brand.trim() : "";
+    const ingredients = result.detected_ingredients || [];
+    let finalAnswer = result.analysis_text ? result.analysis_text.trim() : "";
+
+    // 1. Search brand in database
+    if (brand && brand.length >= 2) {
+      console.log(`[Fast Image Search] Querying database for brand: "${brand}"`);
+      const dbCompanies = await searchData(brand);
+      for (const item of dbCompanies) {
+        if (!matchedItems.some(x => x.id === item.id)) {
+          matchedItems.push(item);
+        }
+      }
+    }
+
+    // 2. Search ingredients in database
+    for (const ing of ingredients) {
+      if (ing && ing.trim().length >= 2) {
+        console.log(`[Fast Image Search] Querying database for ingredient: "${ing}"`);
+        const dbIngredients = await searchData(ing.trim());
+        const additives = dbIngredients.filter(r => r.type === "Қоспа");
+        for (const item of additives) {
+          if (!matchedItems.some(x => x.id === item.id)) {
+            matchedItems.push(item);
           }
-        ]
-      }
-    ];
-
-    await ctx.telegram.editMessageText(
-      ctx.chat.id,
-      processingMsgId,
-      undefined,
-      "🧠 Жасанды интеллект дербес агенттігі іске қосылды. Ойлану циклі жүріп жатыр..."
-    ).catch(() => {});
-
-    // Loop up to 3 turns to allow chain of tools execution
-    let currentIteration = 0;
-    const maxIterations = 3;
-    let finalAnswer = "";
-
-    while (currentIteration < maxIterations) {
-      console.log(`[Agent Loop] Iteration ${currentIteration + 1} starting...`);
-      
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents,
-        config: {
-          systemInstruction,
-          tools: [{ functionDeclarations: [searchDatabaseDeclaration, getIngredientReportDeclaration] }]
         }
-      });
-
-      // Add the model's turn to conversation history
-      const modelTurn = response.candidates?.[0]?.content;
-      if (modelTurn) {
-        contents.push(modelTurn);
-      }
-
-      const functionCalls = response.functionCalls;
-      if (functionCalls && functionCalls.length > 0) {
-        console.log(`[Agent Loop] Detected ${functionCalls.length} function calls from Gemini.`);
-        
-        await ctx.telegram.editMessageText(
-          ctx.chat.id,
-          processingMsgId,
-          undefined,
-          `🛠️ Агент құралдарды шақыруда:\n${functionCalls.map(f => `👉 <code>${f.name}</code>`).join("\n")}`,
-          { parse_mode: 'HTML' }
-        ).catch(() => {});
-
-        const toolParts: any[] = [];
-        
-        for (const call of functionCalls) {
-          const resultData = await executeTool(call.name, call.args, matchedItems);
-          toolParts.push({
-            functionResponse: {
-              name: call.name,
-              response: { result: resultData }
-            }
-          });
-        }
-
-        // Add the tool execution response as a new history entity
-        contents.push({
-          role: "tool",
-          parts: toolParts
-        });
-
-        currentIteration++;
-      } else {
-        // No more function calls, we have our final text answer
-        finalAnswer = response.text || "";
-        break;
       }
     }
 
     if (!finalAnswer) {
-      finalAnswer = "Кешіріңіз, суретті талдау кезінде нақты қорытынды шығара алмадым.";
-    } else {
-      finalAnswer = cleanupMarkdownToHTML(finalAnswer);
+      if (matchedItems.length > 0) {
+        finalAnswer = `Дерекқордан іздеу нәтижесінде сәйкес келетін өнімдер табылды.`;
+      } else {
+        finalAnswer = `Кешіріңіз, суреттегі өнімді немесе мекемені біздің ресми халал дерекқорымыздан таба алмадық. Құрамын тексеріп, күдікті нәрселердің жоқтығына көз жеткізіңіз.`;
+      }
     }
 
-    // Split matched items into companies and ingredients
+    finalAnswer = cleanupMarkdownToHTML(finalAnswer);
+
     const matchedCompanies = matchedItems.filter(item => item.type === "Мекеме");
     const matchedIngredients = matchedItems.filter(item => item.type === "Қоспа");
 

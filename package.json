@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test-script2": "node fetch_api2.cjs",
+    "test-script": "node fetch_api.cjs",
     "dev": "tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",

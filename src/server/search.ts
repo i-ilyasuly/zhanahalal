@@ -78,7 +78,10 @@ export function isMatch(queryText: string, title: string): MatchConfidence {
     'деген', 'қандай', 'осы', 'точно', 'күдікті', 'емес',
     'өнім', 'оним', 'onim', 'тамақ', 'азық', 'дүкен', 'дукен',
     'мекеме', 'өндіруші', 'сұрайын', 'айтшы', 'білгім', 'келеді',
-    'жолы', 'бұлай', 'деген', 'жазады', 'жазды', 'сенен', 'маған'
+    'жолы', 'бұлай', 'деген', 'жазады', 'жазды', 'сенен', 'маған',
+    'қалай', 'калай', 'жағдай', 'жагдай', 'жағдайыңыз', 'жагдайыныз',
+    'аман', 'сау', 'сәлем', 'салем', 'привет', 'кім', 'ким', 'неге',
+    'қалайсың', 'қалайсыз', 'қалайсын', 'рақмет', 'рахмет'
   ]);
   
   const rawWords = queryText.toLowerCase().replace(/-/g, ' ').split(/\s+/);
@@ -269,18 +272,15 @@ export function formatDetailMessage(item: any): string {
   const title = escapeHTML(item.title || "Unknown");
 
   if (item.type === "Мекеме") {
-    let statusName = "---";
-    if (item.status && typeof item.status === "object") {
-      statusName = item.status.name || item.status.title || "---";
-    } else if (item.status) {
-      statusName = String(item.status);
-    }
-    statusName = escapeHTML(statusName);
+    const cert = String(item.certificate_status || "").trim().toLowerCase();
+    const isActive = cert === 'active' || cert.includes('белсенді') || cert.includes('актив');
+    const manufacturer = escapeHTML(item.legal_name || item.title || "---");
 
-    const certStatus = escapeHTML(item.certificate_status || "---");
-    const address = escapeHTML(item.address || "---");
-    const legalName = escapeHTML(item.legal_name || "---");
-    return `✅ <b>«${title}»</b>\n📍 Адрес: ${address}\n📊 Сертификат: ${certStatus}\n🏢 Заңды атауы: ${legalName}`;
+    if (isActive) {
+      return `✅ <b>«${title}»</b> — ҚМДБ Халал Даму базасында ресми тіркелген.\n\n<blockquote expandable>🏢 Өндіруші: «${manufacturer}»\n📊 Статус: ✅ Белсенді</blockquote>`;
+    } else {
+      return `🚫 <b>НАЗАР АУДАРЫҢЫЗ!</b>\n\n<b>«${title}»</b> мекемесінің халал сертификаты <b>МЕРЗІМІ ӨТІП КЕТКЕН!</b>\n\nБұл мекеменің қазіргі уақытта жарамды халал сертификаты жоқ. Барар алдында мекемеден тікелей сертификаттың жаңартылғанын сұраңыз.\n\n<blockquote expandable>🏢 Өндіруші: «${manufacturer}»\n📊 Статус: ❌ Мерзімі аяқталған</blockquote>`;
+    }
   } else {
     let statusEmoji = "❓";
     if (item.status === 'halal') statusEmoji = "✅";

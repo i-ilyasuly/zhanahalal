@@ -114,7 +114,7 @@ describe('search', () => {
     it('should format company details correctly', () => {
       const formatted = formatDetailMessage({ ...CACHE.companies[0], type: 'Мекеме' });
       expect(formatted).toContain('Madi Burger');
-      expect(formatted).toContain('active');
+      expect(formatted).toContain('Белсенді');
     });
 
     it('should format ingredient details correctly', () => {
