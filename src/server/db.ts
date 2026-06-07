@@ -3,34 +3,87 @@ import fs from "fs";
 import path from "path";
 import { cleanText } from "./utils.js";
 
-// FIX for User pasting JSON string into GOOGLE_APPLICATION_CREDENTIALS
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.GOOGLE_APPLICATION_CREDENTIALS.trim().startsWith("{")) {
-  try {
-    const tmpPath = path.join(process.cwd(), "service-account-env.json");
-    fs.writeFileSync(tmpPath, process.env.GOOGLE_APPLICATION_CREDENTIALS);
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
-    console.log("✅ Auto-fixed GOOGLE_APPLICATION_CREDENTIALS (saved raw JSON to a local temp file).");
-  } catch(e) {
-    console.error("Failed to write temp credentials file.");
+function sanitizeJsonString(rawJson: string): string {
+  let inString = false;
+  let escape = false;
+  let result = "";
+  for (let i = 0; i < rawJson.length; i++) {
+    const char = rawJson[i];
+    if (escape) {
+      if (char === '"' || char === '\\' || char === '/' || char === 'b' || char === 'f' || char === 'n' || char === 'r' || char === 't' || char === 'u') {
+        result += '\\' + char;
+      } else {
+        result += char;
+      }
+      escape = false;
+      continue;
+    }
+    if (char === '\\') {
+      escape = true;
+      continue;
+    }
+    if (char === '"') {
+      inString = !inString;
+    }
+    result += char;
+  }
+  return result;
+}
+
+// Apply cleanup if creds look like JSON values
+let parsedCreds: any = null;
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  const trimmed = process.env.GOOGLE_APPLICATION_CREDENTIALS.trim();
+  if (trimmed.startsWith("{")) {
+    try {
+      const cleaned = sanitizeJsonString(trimmed);
+      parsedCreds = JSON.parse(cleaned);
+      const tmpPath = path.join(process.cwd(), "service-account-env.json");
+      fs.writeFileSync(tmpPath, cleaned);
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
+      console.log("✅ Auto-fixed GOOGLE_APPLICATION_CREDENTIALS (sanitized and saved to local file).");
+    } catch (e: any) {
+      console.error("❌ Failed to parse/write sanitized GOOGLE_APPLICATION_CREDENTIALS:", e.message);
+    }
+  }
+}
+
+let parsedJsonCreds: any = null;
+if (process.env.GOOGLE_CREDENTIALS_JSON) {
+  const trimmed = process.env.GOOGLE_CREDENTIALS_JSON.trim();
+  if (trimmed.startsWith("{")) {
+    try {
+      const cleaned = sanitizeJsonString(trimmed);
+      parsedJsonCreds = JSON.parse(cleaned);
+      console.log("✅ GOOGLE_CREDENTIALS_JSON sanitized and prepared.");
+    } catch (e: any) {
+      console.error("❌ Failed to parse GOOGLE_CREDENTIALS_JSON:", e.message);
+    }
   }
 }
 
 // Firebase initialization
 if (!admin.apps.length) {
-  if (process.env.GOOGLE_CREDENTIALS_JSON) {
-
+  const certObject = parsedJsonCreds || parsedCreds;
+  if (certObject) {
     try {
-      const serviceAccount = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
+        credential: admin.credential.cert(certObject)
       });
-      console.log("🔥 Firebase initialized using GOOGLE_CREDENTIALS_JSON from environment variables.");
-    } catch (e) {
-      console.error("❌ Failed to parse GOOGLE_CREDENTIALS_JSON. Please ensure it is a valid JSON string.");
+      console.log("🔥 Firebase initialized explicitly using sanitized service account certificate.");
+    } catch (e: any) {
+      console.error("❌ Failed explicitly initializing Firebase with sanitized cert, falling back:", e.message);
+      try {
+        admin.initializeApp();
+      } catch (inner) {}
     }
   } else {
-    admin.initializeApp();
-    console.log("🔥 Firebase initialized using default environment metadata.");
+    try {
+      admin.initializeApp();
+      console.log("🔥 Firebase initialized using default environment/metadata.");
+    } catch (e: any) {
+      console.error("❌ Default Firebase initialization failed:", e.message);
+    }
   }
 }
 
