@@ -100,7 +100,7 @@ const aiStudio = new GoogleGenAI(aiStudioOptions);
 
 // 2. Initialize Vertex AI Client (Secondary / GCP Billing backed)
 let vertexAi: GoogleGenAI | null = null;
-if (hasServiceAccountFile) {
+if (hasServiceAccountFile && process.env.NODE_ENV !== 'test') {
   try {
     process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccountPath;
     vertexAi = new GoogleGenAI({
@@ -182,7 +182,8 @@ aiStudio.models.generateContent = async function(args: any) {
   };
 
   // If Vertex AI is available, PREFER IT FIRST! (due to Cloud billing configuration)
-  if (vertexAi) {
+  const isFlashLite = String(initialModel).toLowerCase() === 'gemini-flash-lite-latest';
+  if (vertexAi && !isFlashLite) {
     try {
       return await tryVertex(cleanedArgs);
     } catch (vertexErr: any) {
@@ -277,7 +278,8 @@ aiStudio.models.generateContentStream = async function(args: any) {
   };
 
   // If Vertex AI is available, PREFER IT FIRST! (due to Cloud billing configuration)
-  if (vertexAi) {
+  const isFlashLite = String(initialModel).toLowerCase() === 'gemini-flash-lite-latest';
+  if (vertexAi && !isFlashLite) {
     try {
       return await tryVertexStream(cleanedArgs);
     } catch (vertexErr: any) {
