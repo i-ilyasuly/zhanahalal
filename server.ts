@@ -48,24 +48,55 @@ async function startServer() {
     timezone: "Asia/Almaty"
   });
 
-  // Start Telegram Bot Polling
-  if (process.env.BOT_TOKEN && process.env.DISABLE_BOT_POLLING !== "true") {
-    const masked = process.env.BOT_TOKEN.substring(0, 6) + "..." + process.env.BOT_TOKEN.slice(-4);
-    console.log(`📡 Attempting to launch Telegram Bot (Masked: ${masked}, Length: ${process.env.BOT_TOKEN.length})...`);
-    bot.launch({ dropPendingUpdates: true }).then(() => {
-      console.log("✅✅✅ Telegram Bot started via long-polling.");
-      return bot.telegram.getMe();
-    }).then((me) => {
-      console.log(`🤖 Bot identity confirmed: @${me.username} (${me.id})`);
-    }).catch(e => {
-      if (e.message && e.message.includes("409")) {
-        console.warn("\n⚠️⚠️⚠️ [TELEGRAM CONFLICT 409] ⚠️⚠️⚠️\nБотты іске қосу барысында 409 (Conflict) қатесі шықты. Бұл дегеніміз - дәл осы Token-мен басқа серверде немесе Cloud Run-да боттың тағы бір нұсқасы қатар жұмыс істеп тұр.\nTelegram бір уақытта тек БІР ҒАНА бот нұсқасына хабарлама алуға (polling) рұқсат береді. Оларды ажырату немесе тоқтату қажет.\nБаптаулардан 'DISABLE_BOT_POLLING=true' айнымалысын қосу арқылы бұл ортадағы боттың жұмысын тоқтата аласыз.\n");
+  // Environment Detection for Dual-Mode Telegram Bot
+  const isCloudRun = !!process.env.K_SERVICE;
+  const webhookUrl = process.env.WEBHOOK_URL || process.env.CLOUDRUN_URL || process.env.PUBLIC_URL;
+  const webhookSecret = process.env.WEBHOOK_SECRET;
+
+  if (isCloudRun) {
+    console.log("🌐 [Environment] Google Cloud Run ортасы анықталды. Бот өндірістік (Production) WEBHOOK режимінде жұмыс істейді.");
+  } else {
+    console.log("💻 [Environment] AI Studio / Локалды дайындама ортасы анықталды. Бот тестілік LONG POLLING режимінде жұмыс істейді.");
+  }
+
+  // Start Telegram Bot in appropriate mode
+  if (process.env.BOT_TOKEN) {
+    if (isCloudRun) {
+      if (webhookUrl) {
+        const fullWebhookUrl = `${webhookUrl.replace(/\/$/, "")}/api/webhook`;
+        const setWebhookOptions = webhookSecret ? { secret_token: webhookSecret } : undefined;
+        console.log(`📡 [Telegram Webhook] Вебхукты Telegram-да тіркеу әрекеті жасалуда: ${fullWebhookUrl}`);
+        bot.telegram.setWebhook(fullWebhookUrl, setWebhookOptions)
+          .then(() => {
+            console.log(`✅ [Telegram Webhook] Вебхук Telegram серверлерінде сәтті тіркелді: ${fullWebhookUrl}`);
+          })
+          .catch(e => {
+            console.error("❌ [Telegram Webhook] Telegram-да вебхукты тіркеу сәтсіз аяқталды:", e);
+          });
       } else {
-        console.error("❌❌❌ Telegram bot failed to launch:", e);
+        console.warn("⚠️ [Telegram Webhook] Cloud Run ортасы анықталды, бірақ WEBHOOK_URL / CLOUDRUN_URL орнатылмаған! Вебхук дұрыс жұмыс істемеуі мүмкін.");
       }
-    });
-  } else if (process.env.DISABLE_BOT_POLLING === "true") {
-    console.log("⏳ Telegram Bot polling is explicitly DISABLED via DISABLE_BOT_POLLING environment variable.");
+    } else {
+      // AI Studio or sandbox mode: start Long Polling
+      if (process.env.DISABLE_BOT_POLLING !== "true") {
+        const masked = process.env.BOT_TOKEN.substring(0, 6) + "..." + process.env.BOT_TOKEN.slice(-4);
+        console.log(`📡 [Telegram Polling] Ботты AI Studio ішінде long-polling арқылы қосу әрекеті (Masked: ${masked})...`);
+        bot.launch({ dropPendingUpdates: true }).then(() => {
+          console.log("✅✅✅ Telegram Бот long-polling режимінде сәтті қосылды (AI Studio).");
+          return bot.telegram.getMe();
+        }).then((me) => {
+          console.log(`🤖 Бот сәйкестігі расталды: @${me.username} (${me.id})`);
+        }).catch(e => {
+          if (e.message && e.message.includes("409")) {
+            console.warn("\n⚠️⚠️⚠️ [TELEGRAM CONFLICT 409] ⚠️⚠️⚠️\nБотты іске қосу барысында 409 (Conflict) қатесі шықты. Бұл дегеніміз - дәл осы Token-мен басқа серверде немесе Cloud Run-да боттың тағы бір нұсқасы қатар жұмыс істеп тұр.\nTelegram бір уақытта тек БІР ҒАНА бот нұсқасына хабарлама алуға (polling) рұқсат береді. Оларды ажырату немесе тоқтату қажет.\nБаптаулардан 'DISABLE_BOT_POLLING=true' айнымалысын қосу арқылы бұл ортадағы боттың жұмысын тоқтата аласыз.\n");
+          } else {
+            console.error("❌❌❌ Telegram bot failed to launch:", e);
+          }
+        });
+      } else {
+        console.log("⏳ Telegram Bot polling is explicitly DISABLED via DISABLE_BOT_POLLING environment variable.");
+      }
+    }
   } else {
     console.error("⚠️ BOT_TOKEN not found in process.env!");
   }
@@ -230,11 +261,22 @@ async function startServer() {
     }
   });
 
-  // Telegram Webhook Proxy to Python (DEPRECATED)
-  // Replaced with direct Telegraf TS integration above
-  app.post("/api/webhook", (req, res) => {
-    // If webhook config is desired later, mount Telegraf webhook here
-    res.status(200).send("Migrated to TS long-polling.");
+  // --- Telegram Webhook Endpoint ---
+  app.post("/api/webhook", (req, res, next) => {
+    if (isCloudRun) {
+      // Validate webhook secret token if configured
+      if (webhookSecret) {
+        const receivedSecret = req.headers["x-telegram-bot-api-secret-token"];
+        if (receivedSecret !== webhookSecret) {
+          console.warn("⚠️ [Telegram Webhook] Unauthorized request received on webhook router (invalid secret token).");
+          return res.status(403).send("Unauthorized");
+        }
+      }
+      // Pass request directly to Telegraf's webhook processing middleware
+      return bot.webhookCallback("/api/webhook")(req, res, next);
+    } else {
+      res.status(200).send("Telegram Webhook is inactive in development/sandbox mode. Long polling is used inside AI Studio.");
+    }
   });
 
   if (process.env.NODE_ENV !== "production") {
