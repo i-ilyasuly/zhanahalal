@@ -50,7 +50,8 @@ async function startServer() {
 
   // Start Telegram Bot Polling
   if (process.env.BOT_TOKEN && process.env.DISABLE_BOT_POLLING !== "true") {
-    console.log(`📡 Attempting to launch Telegram Bot (Token length: ${process.env.BOT_TOKEN.length})...`);
+    const masked = process.env.BOT_TOKEN.substring(0, 6) + "..." + process.env.BOT_TOKEN.slice(-4);
+    console.log(`📡 Attempting to launch Telegram Bot (Masked: ${masked}, Length: ${process.env.BOT_TOKEN.length})...`);
     bot.launch({ dropPendingUpdates: true }).then(() => {
       console.log("✅✅✅ Telegram Bot started via long-polling.");
       return bot.telegram.getMe();
