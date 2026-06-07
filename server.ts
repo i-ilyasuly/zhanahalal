@@ -105,6 +105,35 @@ async function startServer() {
   process.once('SIGINT', () => bot.stop('SIGINT'));
   process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
+  // --- Telegram Webhook Endpoint ---
+  // Бұл эндпоинт express.json() middleware-інен бұрын орналасуы тиіс.
+  // Себебі express.json() ағынды (stream) ерте оқып, Telegraf-тың оны қайта оқуына кедергі жасайды.
+  app.post("/api/webhook", (req, res, next) => {
+    if (isCloudRun) {
+      console.log(`📥 [Telegram Webhook] Сұраныс алынды: ${req.method} ${req.url}`);
+      // Validate webhook secret token if configured
+      if (webhookSecret) {
+        const receivedSecret = req.headers["x-telegram-bot-api-secret-token"];
+        if (receivedSecret !== webhookSecret) {
+          console.warn("⚠️ [Telegram Webhook] Unauthorized request received on webhook router (invalid secret token).");
+          return res.status(403).send("Unauthorized");
+        }
+      }
+      
+      // Pass request directly to Telegraf's webhook processing middleware.
+      // Telegraf will handle raw stream parsing internally.
+      try {
+        const cb = bot.webhookCallback("/api/webhook");
+        return cb(req, res, next);
+      } catch (err) {
+        console.error("❌ [Telegram Webhook] Webhook callback барысында қате шықты:", err);
+        return res.status(500).send("Webhook Callback Error");
+      }
+    } else {
+      res.status(200).send("Telegram Webhook is inactive in development/sandbox mode. Long polling is used inside AI Studio.");
+    }
+  });
+
   app.use(express.json());
 
   // API Status Endpoint
@@ -258,24 +287,6 @@ async function startServer() {
         res.write(`data: ${JSON.stringify({ error: e.message })}\n\n`);
         res.end();
       }
-    }
-  });
-
-  // --- Telegram Webhook Endpoint ---
-  app.post("/api/webhook", (req, res, next) => {
-    if (isCloudRun) {
-      // Validate webhook secret token if configured
-      if (webhookSecret) {
-        const receivedSecret = req.headers["x-telegram-bot-api-secret-token"];
-        if (receivedSecret !== webhookSecret) {
-          console.warn("⚠️ [Telegram Webhook] Unauthorized request received on webhook router (invalid secret token).");
-          return res.status(403).send("Unauthorized");
-        }
-      }
-      // Pass request directly to Telegraf's webhook processing middleware
-      return bot.webhookCallback("/api/webhook")(req, res, next);
-    } else {
-      res.status(200).send("Telegram Webhook is inactive in development/sandbox mode. Long polling is used inside AI Studio.");
     }
   });
 
