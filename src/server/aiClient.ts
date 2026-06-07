@@ -181,17 +181,17 @@ aiStudio.models.generateContent = async function(args: any) {
     throw new Error("Vertex AI client is not available.");
   };
 
-  // If we already know AI Studio is depleted, bypass it completely!
-  if (isAiStudioDepleted && vertexAi) {
+  // If Vertex AI is available, PREFER IT FIRST! (due to Cloud billing configuration)
+  if (vertexAi) {
     try {
       return await tryVertex(cleanedArgs);
     } catch (vertexErr: any) {
-      console.warn(`[⚠️] Direct Vertex AI generation attempt failed:`, vertexErr.message || vertexErr);
+      console.warn(`[⚠️] Preferred Vertex AI generation failed, falling back to AI Studio:`, vertexErr.message || vertexErr);
     }
   }
 
   try {
-    // Stage 1: Try Primary AI Studio Client
+    // Stage 2: Fallback to AI Studio Client
     return await originalGenerateContent(cleanedArgs);
   } catch (err: any) {
     if (checkDepleted(err)) {
@@ -222,21 +222,7 @@ aiStudio.models.generateContent = async function(args: any) {
       }
     }
 
-    // Stage 2: Try Primary Model mapping on Secondary Vertex AI Client
-    if (vertexAi) {
-      try {
-        const vertexArgs = { ...cleanedArgs };
-        if (vertexArgs.config) {
-          vertexArgs.config = { ...vertexArgs.config };
-          delete vertexArgs.config.thinkingConfig;
-        }
-        return await tryVertex(vertexArgs);
-      } catch (vertexErr: any) {
-        console.warn(`[⚠️] Vertex AI original model generation failed too:`, vertexErr.message || vertexErr);
-      }
-    }
-
-    // Stage 3: Cascade fallbacks through both AI Studio and Vertex AI
+    // Stage 3: Cascade fallbacks through both Vertex AI and AI Studio
     const fallbackModels = ['gemini-2.5-flash', 'gemini-1.5-flash'];
     for (const fallbackModel of fallbackModels) {
       console.log(`[🔄] Cascading content generation fallback to: '${fallbackModel}'...`);
@@ -244,6 +230,15 @@ aiStudio.models.generateContent = async function(args: any) {
       if (fallbackArgs.config) {
         fallbackArgs.config = { ...fallbackArgs.config };
         delete fallbackArgs.config.thinkingConfig;
+      }
+
+      // Try Vertex AI fallback FIRST
+      if (vertexAi) {
+        try {
+          return await tryVertex(fallbackArgs);
+        } catch (vertexEnvErr: any) {
+          console.warn(`[⚠️] Vertex AI fallback to '${fallbackModel}' failed:`, vertexEnvErr.message || vertexEnvErr);
+        }
       }
 
       // Try AI Studio fallback
@@ -255,15 +250,6 @@ aiStudio.models.generateContent = async function(args: any) {
             isAiStudioDepleted = true;
           }
           console.warn(`[⚠️] AI Studio fallback to '${fallbackModel}' failed:`, studioErr.message || studioErr);
-        }
-      }
-      
-      // Try Vertex AI fallback
-      if (vertexAi) {
-        try {
-          return await tryVertex(fallbackArgs);
-        } catch (vertexEnvErr: any) {
-          console.warn(`[⚠️] Vertex AI fallback to '${fallbackModel}' failed:`, vertexEnvErr.message || vertexEnvErr);
         }
       }
     }
@@ -290,17 +276,17 @@ aiStudio.models.generateContentStream = async function(args: any) {
     throw new Error("Vertex AI client is not available.");
   };
 
-  // If we already know AI Studio is depleted, bypass it completely!
-  if (isAiStudioDepleted && vertexAi) {
+  // If Vertex AI is available, PREFER IT FIRST! (due to Cloud billing configuration)
+  if (vertexAi) {
     try {
       return await tryVertexStream(cleanedArgs);
     } catch (vertexErr: any) {
-      console.warn(`[⚠️] Direct Vertex AI stream generation attempt failed:`, vertexErr.message || vertexErr);
+      console.warn(`[⚠️] Preferred Vertex AI stream failed, falling back to AI Studio:`, vertexErr.message || vertexErr);
     }
   }
 
   try {
-    // Stage 1: Try Primary AI Studio Client
+    // Stage 2: Fallback to AI Studio Stream Client
     return await originalGenerateContentStream(cleanedArgs);
   } catch (err: any) {
     if (checkDepleted(err)) {
@@ -329,21 +315,7 @@ aiStudio.models.generateContentStream = async function(args: any) {
       }
     }
 
-    // Stage 2: Try Primary Model mapping on Vertex AI
-    if (vertexAi) {
-      try {
-        const vertexArgs = { ...cleanedArgs };
-        if (vertexArgs.config) {
-          vertexArgs.config = { ...vertexArgs.config };
-          delete vertexArgs.config.thinkingConfig;
-        }
-        return await tryVertexStream(vertexArgs);
-      } catch (vertexErr: any) {
-        console.warn(`[⚠️] Vertex AI original model stream generation failed too:`, vertexErr.message || vertexErr);
-      }
-    }
-
-    // Stage 3: Cascade fallbacks for Stream
+    // Stage 3: Cascade fallbacks for Stream through both Vertex AI and AI Studio
     const fallbackModels = ['gemini-2.5-flash', 'gemini-1.5-flash'];
     for (const fallbackModel of fallbackModels) {
       console.log(`[🔄] Cascading stream generation fallback to: '${fallbackModel}'...`);
@@ -351,6 +323,15 @@ aiStudio.models.generateContentStream = async function(args: any) {
       if (fallbackArgs.config) {
         fallbackArgs.config = { ...fallbackArgs.config };
         delete fallbackArgs.config.thinkingConfig;
+      }
+
+      // Try Vertex fallback FIRST
+      if (vertexAi) {
+        try {
+          return await tryVertexStream(fallbackArgs);
+        } catch (vertexEnvErr: any) {
+          console.warn(`[⚠️] Vertex AI stream fallback to '${fallbackModel}' failed:`, vertexEnvErr.message || vertexEnvErr);
+        }
       }
 
       // Try AI Studio fallback
@@ -362,15 +343,6 @@ aiStudio.models.generateContentStream = async function(args: any) {
             isAiStudioDepleted = true;
           }
           console.warn(`[⚠️] AI Studio stream fallback to '${fallbackModel}' failed:`, studioErr.message || studioErr);
-        }
-      }
-      
-      // Try Vertex fallback
-      if (vertexAi) {
-        try {
-          return await tryVertexStream(fallbackArgs);
-        } catch (vertexEnvErr: any) {
-          console.warn(`[⚠️] Vertex AI stream fallback to '${fallbackModel}' failed:`, vertexEnvErr.message || vertexEnvErr);
         }
       }
     }
@@ -413,18 +385,18 @@ aiStudio.models.embedContent = async function(args: any) {
     return res;
   };
 
-  // If we already know AI Studio is depleted, bypass it completely!
-  if (isAiStudioDepleted && vertexAi) {
+  // If Vertex AI is available, PREFER IT FIRST! (due to Cloud billing configuration)
+  if (vertexAi) {
     try {
       const res = await tryVertexEmbed(cleanedArgs);
       return normalizeResponse(res);
     } catch (vertexErr: any) {
-      console.warn(`[⚠️] Direct Vertex AI embedding attempt failed:`, vertexErr.message || vertexErr);
+      console.warn(`[⚠️] Preferred Vertex AI embedding failed, falling back to AI Studio:`, vertexErr.message || vertexErr);
     }
   }
 
   try {
-    // Stage 1: Try Primary AI Studio Client
+    // Stage 2: Fallback to AI Studio Embeddings
     const res = await originalEmbedContent(cleanedArgs);
     return normalizeResponse(res);
   } catch (err: any) {
@@ -436,16 +408,6 @@ aiStudio.models.embedContent = async function(args: any) {
     // Only log if we didn't expect it to fail (403/404) and if it's not handled
     if (!checkDepleted(err)) {
       console.warn(`[⚠️] AI Studio Embedding error with model ${initialModel}:`, errorStr);
-    }
-
-    // Stage 2: Try Vertex AI with same model
-    if (vertexAi) {
-      try {
-        const res = await tryVertexEmbed(cleanedArgs);
-        return normalizeResponse(res);
-      } catch (vertexErr: any) {
-        console.warn(`[⚠️] Vertex AI original model embedding failed too:`, vertexErr.message || vertexErr);
-      }
     }
 
     // Stage 3: Cascade fallback models (with different names tailored to Vertex and AI Studio)
@@ -460,6 +422,16 @@ aiStudio.models.embedContent = async function(args: any) {
       console.log(`[🔄] Cascading embedding fallback to: '${fallbackModel}'...`);
       const fallbackArgs = { ...cleanedArgs, model: fallbackModel };
 
+      // Try Vertex AI fallback FIRST
+      if (vertexAi) {
+        try {
+          const res = await tryVertexEmbed(fallbackArgs);
+          return normalizeResponse(res);
+        } catch (vertexEnvErr: any) {
+          console.warn(`[⚠️] Vertex AI embedding fallback to '${fallbackModel}' failed:`, vertexEnvErr.message || vertexEnvErr);
+        }
+      }
+
       // Try AI Studio
       if (!isAiStudioDepleted) {
         try {
@@ -470,16 +442,6 @@ aiStudio.models.embedContent = async function(args: any) {
             isAiStudioDepleted = true;
           }
           console.warn(`[⚠️] AI Studio embedding fallback to '${fallbackModel}' failed:`, studioErr.message || studioErr);
-        }
-      }
-      
-      // Try Vertex AI
-      if (vertexAi) {
-        try {
-          const res = await tryVertexEmbed(fallbackArgs);
-          return normalizeResponse(res);
-        } catch (vertexEnvErr: any) {
-          console.warn(`[⚠️] Vertex AI embedding fallback to '${fallbackModel}' failed:`, vertexEnvErr.message || vertexEnvErr);
         }
       }
     }

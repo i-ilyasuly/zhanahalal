@@ -1,24 +1,9 @@
-import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
+import { Type, FunctionDeclaration } from "@google/genai";
 import { searchData } from "./search.js";
+import { ai } from "./aiClient.js";
 
-let aiInstance: GoogleGenAI | null = null;
-
-function getAI(): GoogleGenAI {
-  if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY environment variable is required. Please set it in the Secrets panel.");
-    }
-    aiInstance = new GoogleGenAI({ 
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        }
-      }
-    });
-  }
-  return aiInstance;
+function getAI(): any {
+  return ai;
 }
 
 // 1. Tool (Function) Declarations
