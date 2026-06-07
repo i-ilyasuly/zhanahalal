@@ -78,24 +78,22 @@ async function startServer() {
       }
     } else {
       // AI Studio or sandbox mode: start Long Polling
-      if (process.env.DISABLE_BOT_POLLING !== "true") {
-        const masked = process.env.BOT_TOKEN.substring(0, 6) + "..." + process.env.BOT_TOKEN.slice(-4);
-        console.log(`📡 [Telegram Polling] Ботты AI Studio ішінде long-polling арқылы қосу әрекеті (Masked: ${masked})...`);
-        bot.launch({ dropPendingUpdates: true }).then(() => {
-          console.log("✅✅✅ Telegram Бот long-polling режимінде сәтті қосылды (AI Studio).");
-          return bot.telegram.getMe();
-        }).then((me) => {
-          console.log(`🤖 Бот сәйкестігі расталды: @${me.username} (${me.id})`);
-        }).catch(e => {
-          if (e.message && e.message.includes("409")) {
-            console.warn("\n⚠️⚠️⚠️ [TELEGRAM CONFLICT 409] ⚠️⚠️⚠️\nБотты іске қосу барысында 409 (Conflict) қатесі шықты. Бұл дегеніміз - дәл осы Token-мен басқа серверде немесе Cloud Run-да боттың тағы бір нұсқасы қатар жұмыс істеп тұр.\nTelegram бір уақытта тек БІР ҒАНА бот нұсқасына хабарлама алуға (polling) рұқсат береді. Оларды ажырату немесе тоқтату қажет.\nБаптаулардан 'DISABLE_BOT_POLLING=true' айнымалысын қосу арқылы бұл ортадағы боттың жұмысын тоқтата аласыз.\n");
-          } else {
-            console.error("❌❌❌ Telegram bot failed to launch:", e);
-          }
-        });
-      } else {
-        console.log("⏳ Telegram Bot polling is explicitly DISABLED via DISABLE_BOT_POLLING environment variable.");
-      }
+      // Жаңа ереже: AI Studio ішінде сынақ ботын іске қосу үшін DISABLE_BOT_POLLING мәніне қарамаймыз,
+      // өйткені бұл ортада сыртқы URL жоқ және тек Long Polling арқылы ғана бот жұмыс істей алады.
+      const masked = process.env.BOT_TOKEN.substring(0, 6) + "..." + process.env.BOT_TOKEN.slice(-4);
+      console.log(`📡 [Telegram Polling] Ботты AI Studio ішінде long-polling арқылы қосу әрекеті (Masked: ${masked})...`);
+      bot.launch({ dropPendingUpdates: true }).then(() => {
+        console.log("✅✅✅ Telegram Бот long-polling режимінде сәтті қосылды (AI Studio).");
+        return bot.telegram.getMe();
+      }).then((me) => {
+        console.log(`🤖 Бот сәйкестігі расталды: @${me.username} (${me.id})`);
+      }).catch(e => {
+        if (e.message && e.message.includes("409")) {
+          console.warn("\n⚠️⚠️⚠️ [TELEGRAM CONFLICT 409] ⚠️⚠️⚠️\nБотты іске қосу барысында 409 (Conflict) қатесі шықты. Бұл дегеніміз - дәл осы Token-мен басқа серверде немесе Cloud Run-да боттың тағы бір нұсқасы қатар жұмыс істеп тұр.\nTelegram бір уақытта тек БІР ҒАНА бот нұсқасына хабарлама алуға (polling) рұқсат береді. Оларды ажырату немесе тоқтату қажет.\nБаптаулардан 'DISABLE_BOT_POLLING=true' айнымалысын қосу арқылы бұл ортадағы боттың жұмысын тоқтата аласыз.\n");
+        } else {
+          console.error("❌❌❌ Telegram bot failed to launch:", e);
+        }
+      });
     }
   } else {
     console.error("⚠️ BOT_TOKEN not found in process.env!");
@@ -108,9 +106,11 @@ async function startServer() {
   // --- Telegram Webhook Endpoint ---
   // Бұл эндпоинт express.json() middleware-інен бұрын орналасуы тиіс.
   // Себебі express.json() ағынды (stream) ерте оқып, Telegraf-тың оны қайта оқуына кедергі жасайды.
+  const handleWebhook = bot.webhookCallback("/api/webhook");
+
   app.post("/api/webhook", (req, res, next) => {
     if (isCloudRun) {
-      console.log(`📥 [Telegram Webhook] Сұраныс алынды: ${req.method} ${req.url}`);
+      console.log(`📥 [Telegram Webhook] Сұраныс алынды: ${req.method} ${req.originalUrl || req.url}`);
       // Validate webhook secret token if configured
       if (webhookSecret) {
         const receivedSecret = req.headers["x-telegram-bot-api-secret-token"];
@@ -120,11 +120,13 @@ async function startServer() {
         }
       }
       
+      // Ensure the URL matches exactly what Telegraf's webhookCallback expects
+      req.url = "/api/webhook";
+
       // Pass request directly to Telegraf's webhook processing middleware.
       // Telegraf will handle raw stream parsing internally.
       try {
-        const cb = bot.webhookCallback("/api/webhook");
-        return cb(req, res, next);
+        return handleWebhook(req, res, next);
       } catch (err) {
         console.error("❌ [Telegram Webhook] Webhook callback барысында қате шықты:", err);
         return res.status(500).send("Webhook Callback Error");

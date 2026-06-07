@@ -38,16 +38,7 @@ export async function handleTextMessage(ctx: MyContext) {
   const draftId = ctx.message?.message_id || Math.floor(Math.random() * 100000) + 1;
   
   // Immediately show "Thinking..." indicator
-  if (ctx.chat?.type === 'private') {
-    await ctx.telegram.callApi('sendMessageDraft' as any, {
-      chat_id: ctx.chat.id,
-      message_thread_id: threadId,
-      draft_id: draftId,
-      text: ""
-    }).catch(() => {});
-  } else {
-    await ctx.sendChatAction("typing").catch(() => {});
-  }
+  await ctx.sendChatAction("typing").catch(() => {});
   
   saveChatHistory(userId, 'user', query, threadId).catch(console.error);
 
