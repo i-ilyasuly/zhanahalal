@@ -99,7 +99,7 @@ export const CACHE = {
 // Function to populate the cache
 export async function loadCache(isManualSync = false) {
   const timeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error("Firestore timeout (15s)")), 15000)
+    setTimeout(() => reject(new Error("Firestore timeout (45s)")), 45000)
   );
 
   try {
