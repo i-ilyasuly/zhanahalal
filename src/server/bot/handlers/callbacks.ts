@@ -59,7 +59,10 @@ export async function handleIngredientDetailAction(ctx: MyContext) {
     await ctx.answerCbQuery().catch(() => {});
     const quote = getQuote(getQuoteCategory(item));
     const text = formatDetailMessage(item) + quote;
-    await ctx.reply(text, { parse_mode: 'HTML' });
+    await ctx.reply(text, { 
+      parse_mode: 'HTML',
+      ...((ctx.callbackQuery?.message as any)?.message_thread_id ? { message_thread_id: (ctx.callbackQuery?.message as any).message_thread_id } : {})
+    });
   } catch (error) {
     console.error("Ingredient detail callback error:", error);
     await ctx.answerCbQuery("Қате кетті.").catch(() => {});

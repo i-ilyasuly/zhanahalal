@@ -244,7 +244,7 @@ export async function executeAgenticImageSearch(ctx: any, base64Image: string, d
 Осы көрнекі JSON форматынан басқа ешбір артық мәтінді қайтарма. JSON валидті болуы тиіс.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-flash-lite-latest",
+      model: "gemini-2.5-flash",
       contents: [
         {
           role: "user",

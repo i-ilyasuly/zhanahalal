@@ -40,11 +40,31 @@ let serviceAccountPath = path.join(process.cwd(), 'gcp-service-account.json');
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.GOOGLE_APPLICATION_CREDENTIALS.trim().startsWith("{")) {
   try {
     const tmpPath = path.join(process.cwd(), "service-account-env.json");
-    fs.writeFileSync(tmpPath, process.env.GOOGLE_APPLICATION_CREDENTIALS);
+    let credsStr = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    
+    // Abstract the fix for bad escapes
+    if (credsStr) {
+       // Replace backslashes not followed by valid JSON escape character
+       // But wait! It might be easier to just remove invalid backslashes if they are part of a base64 key?
+       // Let's just fix \ followed by any non-standard char
+       // private keys are base64, so \V shouldn't be there, it's a typo in the key or escaping issue. 
+       // We can just escape all backslashes that are NOT followed by n, t, r, ", \
+       credsStr = credsStr.replace(/\\([^ntr"\\/bf])/g, '\\\\$1');
+       // And fix literal newlines in strings
+       credsStr = credsStr.replace(/\n/g, '\\n');
+    }
+    
+    try {
+       let parsed = JSON.parse(credsStr);
+       fs.writeFileSync(tmpPath, JSON.stringify(parsed, null, 2));
+    } catch(err) {
+       fs.writeFileSync(tmpPath, credsStr);
+    }
+    
     process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
     console.log("[✅] aiClient: Auto-fixed GOOGLE_APPLICATION_CREDENTIALS JSON string.");
   } catch (e) {
-    console.error("Failed to auto-fix credentials in aiClient.");
+    console.error("Failed to auto-fix credentials in aiClient.", e);
   }
 }
 
@@ -156,9 +176,8 @@ function mapModelForVertex(modelName: string): string {
     return 'text-multilingual-embedding-002';
   }
   if (clean.includes('pro')) {
-    return 'gemini-1.5-pro';
+    return 'gemini-2.5-pro';
   }
-  // All other flash/lite or unknown models:
   return 'gemini-2.5-flash';
 }
 
@@ -182,8 +201,7 @@ aiStudio.models.generateContent = async function(args: any) {
   };
 
   // If Vertex AI is available, PREFER IT FIRST! (due to Cloud billing configuration)
-  const isFlashLite = String(initialModel).toLowerCase() === 'gemini-flash-lite-latest';
-  if (vertexAi && !isFlashLite) {
+  if (vertexAi) {
     try {
       return await tryVertex(cleanedArgs);
     } catch (vertexErr: any) {
@@ -278,8 +296,7 @@ aiStudio.models.generateContentStream = async function(args: any) {
   };
 
   // If Vertex AI is available, PREFER IT FIRST! (due to Cloud billing configuration)
-  const isFlashLite = String(initialModel).toLowerCase() === 'gemini-flash-lite-latest';
-  if (vertexAi && !isFlashLite) {
+  if (vertexAi) {
     try {
       return await tryVertexStream(cleanedArgs);
     } catch (vertexErr: any) {
@@ -474,6 +491,6 @@ export async function generateContentStreamFixed(args: any) {
 
 // Configurable model definitions from environment variables
 export const GEMINI_EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-2';
-export const GEMINI_GENERATION_MODEL = process.env.GEMINI_GENERATION_MODEL || 'gemini-flash-lite-latest';
-export const GEMINI_INTENT_MODEL = process.env.GEMINI_INTENT_MODEL || 'gemini-flash-lite-latest';
+export const GEMINI_GENERATION_MODEL = process.env.GEMINI_GENERATION_MODEL || 'gemini-2.5-flash';
+export const GEMINI_INTENT_MODEL = process.env.GEMINI_INTENT_MODEL || 'gemini-2.5-flash';
 

@@ -15,7 +15,7 @@ export async function chatWithAI(text: string, isSymbat: boolean): Promise<strin
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-flash-lite-latest',
+      model: 'gemini-2.5-flash',
       contents: prompt
     });
     return response.text?.trim() || "Сәлеметсіз бе! Мен Halal Damu ботымын, сізге қалай көмектесе аламын?";
@@ -32,7 +32,7 @@ export async function getNotFoundReply(originalName: string, normalizedName: str
   
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-flash-lite-latest',
+      model: 'gemini-2.5-flash',
       contents: prompt
     });
     return response.text?.trim() || `Кешіріңіз, «${qStr}» ҚМДБ халал базасынан табылмады.`;

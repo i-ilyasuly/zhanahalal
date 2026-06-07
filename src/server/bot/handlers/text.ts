@@ -4,7 +4,7 @@ import { saveChatHistory } from "../../db.js";
 import { formatDetailMessage, getQuoteCategory, searchData } from "../../search.js";
 import { sendResultWithPhoto, sendSearchPage } from "../helpers.js";
 import { autoRenameTopic } from "../topicRenamer.js";
-import { shouldClassify, classifyQuery } from "../classifier.js";
+import { shouldClassify, classifyQuery } from "../intentClassifier.js";
 import { chatWithAI, getNotFoundReply } from "../aiChat.js";
 import { getQuote } from "../../quotes.js";
 import { streamTextToTelegram } from "../streamUtils.js";
@@ -20,25 +20,43 @@ export async function handleTextMessage(ctx: MyContext) {
   }
   if (!query) return;
 
+  const userId = ctx.from?.id || 0;
+  const threadId = ctx.message?.message_thread_id;
+  const isSymbat = userId === 1042456426;
+
   if (query === "📍 Айналадағы халал мекемелер") {
+    const replyOpts = {
+      ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {}),
+      ...(threadId ? { message_thread_id: threadId } : {})
+    } as any;
+    
     return ctx.reply(
       "📍 Айналадағы халал мекемелерді іздеу үшін ұялы телефоннан осы батырманы басыңыз немесе өз орналасқан жеріңізді (Location) жіберіңіз.\n\nКоманда: /start батырманы қайта шығару үшін.",
-      Markup.keyboard([
-        [Markup.button.locationRequest("📍 Менің орнымды жіберу")],
-        ["📍 Айналадағы халал мекемелер"]
-      ]).resize()
+      {
+        reply_markup: Markup.keyboard([
+          [Markup.button.locationRequest("📍 Менің орнымды жіберу")],
+          ["📍 Айналадағы халал мекемелер"]
+        ]).resize().reply_markup,
+        ...replyOpts
+      }
     );
   }
   
-  console.log(`📩 Message from ${ctx.from?.username || ctx.from?.id}: ${query}`);
-  const userId = ctx.from?.id || 0;
-  const isSymbat = userId === 1042456426;
+  console.log(`📩 Message from ${ctx.from?.username || userId}: ${query}`);
 
-  const threadId = ctx.message?.message_thread_id;
   const draftId = ctx.message?.message_id || Math.floor(Math.random() * 100000) + 1;
   
   // Immediately show "Thinking..." indicator
-  await ctx.sendChatAction("typing").catch(() => {});
+  if (ctx.chat?.type === 'private') {
+    await ctx.telegram.callApi('sendMessageDraft' as any, {
+      chat_id: ctx.chat.id,
+      message_thread_id: threadId,
+      draft_id: draftId,
+      text: ""
+    }).catch(() => {});
+  } else {
+    await ctx.sendChatAction("typing").catch(() => {});
+  }
   
   saveChatHistory(userId, 'user', query, threadId).catch(console.error);
 
@@ -69,7 +87,7 @@ export async function handleTextMessage(ctx: MyContext) {
 
       await ctx.reply(aiReply, {
         parse_mode: 'HTML',
-        reply_parameters: { message_id: ctx.message?.message_id },
+        ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {}),
         message_thread_id: threadId
       }).catch(console.error);
       
@@ -129,7 +147,7 @@ export async function handleTextMessage(ctx: MyContext) {
 
     await ctx.reply(notFoundReply, {
       parse_mode: 'HTML',
-      reply_parameters: { message_id: ctx.message?.message_id },
+      ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {}),
       message_thread_id: threadId
     }).catch(console.error);
     
@@ -137,7 +155,8 @@ export async function handleTextMessage(ctx: MyContext) {
   } catch (err: any) {
     console.error("Text handling error:", err);
     await ctx.reply("😔 Сұранысты өңдеу кезінде қате кетті. Сәл күте тұрып қайталап көріңіз.", {
-      message_thread_id: threadId
+      message_thread_id: threadId,
+      ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
     }).catch(() => {});
   }
 }

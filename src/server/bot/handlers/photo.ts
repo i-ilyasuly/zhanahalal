@@ -37,7 +37,10 @@ export async function handlePhotoMessage(ctx: MyContext) {
     const result = await executeAgenticImageSearch(ctx, base64Image, draftId);
 
     if (!result || !result.success) {
-      await ctx.reply("😔 Кешіріңіз, суретті талдау кезінде қате кетті. Тағы да көріңіз.", { message_thread_id: threadId });
+      await ctx.reply("😔 Кешіріңіз, суретті талдау кезінде қате кетті. Тағы да көріңіз.", { 
+        message_thread_id: threadId,
+        ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
+      });
       return;
     }
 
@@ -57,7 +60,11 @@ export async function handlePhotoMessage(ctx: MyContext) {
     if (matchedCompanies.length === 0 && matchedIngredients.length === 0) {
       // Direct conversational response from Agent (no concrete db references)
       await streamTextToTelegram(ctx, draftId, finalAnswer);
-      await ctx.reply(finalAnswer, { parse_mode: 'HTML', message_thread_id: threadId });
+      await ctx.reply(finalAnswer, { 
+        parse_mode: 'HTML', 
+        message_thread_id: threadId,
+        ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
+      });
       return;
     }
 
@@ -109,7 +116,8 @@ export async function handlePhotoMessage(ctx: MyContext) {
         {
           parse_mode: 'HTML',
           reply_markup: Markup.inlineKeyboard(rows).reply_markup,
-          message_thread_id: threadId
+          message_thread_id: threadId,
+          ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
         }
       ).catch(console.error);
     }
@@ -118,9 +126,14 @@ export async function handlePhotoMessage(ctx: MyContext) {
     console.error("handlePhotoMessage error:", error);
     const errorStr = String(error);
     if (errorStr.includes("429") || errorStr.includes("quota") || errorStr.includes("RESOURCE_EXHAUSTED")) {
-      await ctx.reply("⚠️ <b>Gemini AI сұраныс лимиті уақытша таусылды.</b>\nҚазіргі уақытта тегін деңгейдегі күнделікті сұраныстар шегіне жетті (немесе сурет жіберу жиілігі тым жоғары). Сәл күте тұрып (әдетте 1 минуттан соң немесе жаңа күн басталғанда) қайтадан жіберіп көріңіз.", { parse_mode: 'HTML' });
+      await ctx.reply("⚠️ <b>Gemini AI сұраныс лимиті уақытша таусылды.</b>\nҚазіргі уақытта тегін деңгейдегі күнделікті сұраныстар шегіне жетті (немесе сурет жіберу жиілігі тым жоғары). Сәл күте тұрып (әдетте 1 минуттан соң немесе жаңа күн басталғанда) қайтадан жіберіп көріңіз.", { 
+        parse_mode: 'HTML',
+        ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
+      });
     } else {
-      await ctx.reply("😔 Суретті талдау кезінде қате кетті. Сәл күте тұрып, тағы да жіберіп көріңіз.");
+      await ctx.reply("😔 Суретті талдау кезінде қате кетті. Сәл күте тұрып, тағы да жіберіп көріңіз.", {
+        ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
+      });
     }
   }
 }

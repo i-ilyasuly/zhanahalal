@@ -46,7 +46,10 @@ export const bot = new Telegraf<MyContext>(token || "dummy");
 // --- Global Error Handling ---
 bot.catch((err, ctx) => {
   console.error(`❌ Bot Error for updateId ${ctx.update.update_id}:`, err);
-  ctx.reply("Кешіріңіз, сұранысты өңдеу кезінде қате кетті. Сәлден соң қайталап көріңіз.").catch(console.error);
+  const replyOpts = {
+    ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
+  } as any;
+  ctx.reply("Кешіріңіз, сұранысты өңдеу кезінде қате кетті. Сәлден соң қайталап көріңіз.", replyOpts).catch(console.error);
 });
 
 // --- Midllewares ---
@@ -60,12 +63,19 @@ bot.use(trackingMiddleware);
 
 // --- Standard Handlers (Start & Triggers) ---
 bot.start((ctx) => {
+  const replyOpts = {
+    ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
+  } as any;
+  
   ctx.reply(
     "Ассалаумағалейкум! Бұл Halal Damu боты. Өнімнің немесе қоспаның атын жазыңыз немесе суретін жіберіңіз.",
-    Markup.keyboard([
-      [Markup.button.locationRequest("📍 Менің орнымды жіберу")],
-      ["📍 Айналадағы халал мекемелер"]
-    ]).resize()
+    {
+      reply_markup: Markup.keyboard([
+        [Markup.button.locationRequest("📍 Менің орнымды жіберу")],
+        ["📍 Айналадағы халал мекемелер"]
+      ]).resize().reply_markup,
+      ...replyOpts
+    }
   );
 });
 

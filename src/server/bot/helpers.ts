@@ -47,7 +47,8 @@ export async function sendResultWithPhoto(ctx: MyContext, result: any, text: str
   const opts = {
     parse_mode: 'HTML' as const,
     reply_markup: getMapKeyboard(result),
-    message_effect_id: effectId || undefined
+    message_effect_id: effectId || undefined,
+    ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
   } as any;
 
   try {
@@ -165,7 +166,7 @@ export async function sendSearchPage(ctx: MyContext, page: number = 0, isPhoto: 
       opts
     ).catch(e => console.error("Edit failed:", e));
   } else {
-    if (ctx.message?.message_id) {
+    if (ctx.message?.message_id && ctx.chat?.type !== 'private') {
        opts.reply_parameters = { message_id: ctx.message.message_id };
     }
     await ctx.reply(msgText, opts).catch(e => console.error("Reply failed:", e));
@@ -173,9 +174,12 @@ export async function sendSearchPage(ctx: MyContext, page: number = 0, isPhoto: 
 }
 
 export async function sendNearbyPage(ctx: MyContext, page: number, messageIdToEdit?: number) {
+  const opts = {
+    ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
+  } as any;
   const results = ctx.session.nearbyResults || [];
   if (results.length === 0) {
-    return ctx.reply("Кешіріңіз, 10 км радиуста мекемелер табылмады.");
+    return ctx.reply("Кешіріңіз, 10 км радиуста мекемелер табылмады.", opts);
   }
 
   const PAGE_SIZE = 3;
@@ -250,6 +254,9 @@ export async function sendNearbyPage(ctx: MyContext, page: number, messageIdToEd
   if (messageIdToEdit && ctx.chat) {
     await ctx.telegram.editMessageText(ctx.chat.id, messageIdToEdit, undefined, response, extra).catch(e => console.error(e));
   } else {
+    if (ctx.message?.message_id && ctx.chat?.type !== 'private') {
+      (extra as any).reply_parameters = { message_id: ctx.message.message_id };
+    }
     await ctx.reply(response, extra);
   }
 }

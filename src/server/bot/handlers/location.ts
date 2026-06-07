@@ -8,7 +8,11 @@ export async function handleLocationMessage(ctx: MyContext) {
   const lat = ctx.message.location.latitude;
   const lon = ctx.message.location.longitude;
   
-  const processingMsg = await ctx.reply("🔍 Сізге жақын халал мекемелерді іздеудемін...");
+  const replyOpts = {
+    ...(ctx.chat?.type !== 'private' && ctx.message?.message_id ? { reply_parameters: { message_id: ctx.message.message_id } } : {})
+  };
+  
+  const processingMsg = await ctx.reply("🔍 Сізге жақын халал мекемелерді іздеудемін...", replyOpts);
   
   try {
     const nearby = await findNearbyCompanies(lat, lon, 10);
@@ -26,7 +30,7 @@ export async function handleLocationMessage(ctx: MyContext) {
           'search'
         ).catch(console.error);
       }
-      return ctx.reply("Кешіріңіз, 10 км радиуста халал мекемелер табылдамады.");
+      return ctx.reply("Кешіріңіз, 10 км радиуста халал мекемелер табылдамады.", replyOpts);
     }
 
     if (ctx.message.message_thread_id) {
@@ -43,6 +47,6 @@ export async function handleLocationMessage(ctx: MyContext) {
   } catch (error) {
     console.error("Location search error:", error);
     await ctx.deleteMessage(processingMsg.message_id).catch(() => {});
-    ctx.reply("Іздеу кезінде қате кетті. Кейінірек қайталап көріңіз.");
+    ctx.reply("Іздеу кезінде қате кетті. Кейінірек қайталап көріңіз.", replyOpts);
   }
 }
