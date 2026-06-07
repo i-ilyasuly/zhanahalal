@@ -20,10 +20,10 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.GOOGLE_APPLICATION
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-import { loadCache } from "./src/server/db.js";
-import { bot } from "./src/server/bot.js";
-import { searchData } from "./src/server/search.js";
-import { runSync } from "./src/server/scripts/sync_companies.js";
+import { loadCache } from "./src/server/src_server_db.js";
+import { bot } from "./src/server/src_server_bot.js";
+import { searchData } from "./src/server/src_server_search.js";
+import { runSync } from "./src/server/src_server_scripts_sync_companies.js";
 
 async function startServer() {
   const app = express();
@@ -52,18 +52,27 @@ async function startServer() {
   if (process.env.BOT_TOKEN) {
     const masked = process.env.BOT_TOKEN.substring(0, 6) + "..." + process.env.BOT_TOKEN.slice(-4);
     console.log(`📡 [Telegram Polling] Ботты іске қосу әрекеті (Masked: ${masked})...`);
-    bot.launch({ dropPendingUpdates: true }).then(() => {
-      console.log("✅✅✅ Telegram Бот long-polling режимінде сәтті қосылды.");
-      return bot.telegram.getMe();
-    }).then((me) => {
-      console.log(`🤖 Бот сәйкестігі расталды: @${me.username} (${me.id})`);
-    }).catch(e => {
-      if (e.message && e.message.includes("409")) {
-        console.warn("\n⚠️⚠️⚠️ [TELEGRAM CONFLICT 409] ⚠️⚠️⚠️\nБотты іске қосу барысында 409 (Conflict) қатесі шықты. Бұл дегеніміз - дәл осы Token-мен басқа серверде боттың тағы бір нұсқасы қатар жұмыс істеп тұр.\nTelegram бір уақытта тек БІР ҒАНА бот нұсқасына хабарлама алуға (polling) рұқсат береді.\n");
-      } else {
-        console.error("❌❌❌ Telegram bot failed to launch:", e);
-      }
-    });
+    
+    // Explicitly delete any existing webhook to clear conflicting configuration
+    bot.telegram.deleteWebhook({ drop_pending_updates: true })
+      .then(() => {
+        console.log("🧹 Кез келген ескі Webhook сәтті өшірілді.");
+        return bot.launch({ dropPendingUpdates: true });
+      })
+      .then(() => {
+        console.log("✅✅✅ Telegram Бот long-polling режимінде сәтті қосылды.");
+        return bot.telegram.getMe();
+      })
+      .then((me) => {
+        console.log(`🤖 Бот сәйкестігі расталды: @${me.username} (${me.id})`);
+      })
+      .catch(e => {
+        if (e.message && e.message.includes("409")) {
+          console.warn("\n⚠️⚠️⚠️ [TELEGRAM CONFLICT 409] ⚠️⚠️⚠️\nБотты іске қосу барысында 409 (Conflict) қатесі шықты. Бұл дегеніміз - дәл осы Token-мен басқа серверде боттың тағы бір нұсқасы қатар жұмыс істеп тұр.\nTelegram бір уақытта тек БІР ҒАНА бот нұсқасына хабарлама алуға (polling) рұқсат береді.\n");
+        } else {
+          console.error("❌❌❌ Telegram bot failed to launch:", e);
+        }
+      });
   } else {
     console.error("⚠️ BOT_TOKEN not found in process.env!");
   }
@@ -102,7 +111,7 @@ async function startServer() {
   });
 
   // --- Admin API Routes ---
-  const { db } = await import("./src/server/db.js"); // lazy load since it's exported from db.js
+  const { db } = await import("./src/server/src_server_db.js"); // lazy load since it's exported from db.js
 
   app.get("/api/admin/:collection", async (req, res) => {
     const { collection } = req.params;
@@ -192,7 +201,7 @@ async function startServer() {
   app.post("/api/chat", async (req, res) => {
     try {
       const { message, history } = req.body;
-      const { ai } = await import("./src/server/aiClient.js");
+      const { ai } = await import("./src/server/src_server_aiClient.js");
 
       const contents = history ? [...history] : [];
       if (message) {

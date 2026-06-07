@@ -1,6 +1,6 @@
 import * as fuzz from "fuzzball";
-import { CACHE, loadCache } from "./db.js";
-import { escapeHTML, getDistance } from "./utils.js";
+import { CACHE, loadCache } from "./src_server_db.js";
+import { escapeHTML, getDistance } from "./src_server_utils.js";
 
 type MatchConfidence = "exact" | "fuzzy" | "none";
 

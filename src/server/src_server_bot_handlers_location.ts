@@ -1,7 +1,7 @@
-import { MyContext } from "../types.js";
-import { findNearbyCompanies } from "../../search.js";
-import { sendNearbyPage } from "../helpers.js";
-import { autoRenameTopic } from "../topicRenamer.js";
+import { MyContext } from "./src_server_bot_types.js";
+import { findNearbyCompanies } from "./src_server_search.js";
+import { sendNearbyPage } from "./src_server_bot_helpers.js";
+import { autoRenameTopic } from "./src_server_bot_topicRenamer.js";
 
 export async function handleLocationMessage(ctx: MyContext) {
   if (!ctx.message || !('location' in ctx.message)) return;

@@ -1,5 +1,5 @@
-import { db } from "../db.js";
-import { ai } from "../aiClient.js";
+import { db } from "./src_server_db.js";
+import { ai } from "./src_server_aiClient.js";
 
 const renamedTopicsLocalCache = new Set<string>();
 

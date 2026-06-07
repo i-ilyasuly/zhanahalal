@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { groupMentionFilterMiddleware } from '../src/server/bot/middlewares';
+import { groupMentionFilterMiddleware } from '../src/server/src_server_bot_middlewares.js';
 
 describe('groupMentionFilterMiddleware', () => {
     it('should let private chats pass under any condition', async () => {

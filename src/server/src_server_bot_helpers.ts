@@ -1,8 +1,8 @@
 import { Markup } from "telegraf";
-import { MyContext } from "./types.js";
-import { getQuoteCategory, formatDetailMessage } from "../search.js";
-import { getQuote } from "../quotes.js";
-import { escapeHTML } from "../utils.js";
+import { MyContext } from "./src_server_bot_types.js";
+import { getQuoteCategory, formatDetailMessage } from "./src_server_search.js";
+import { getQuote } from "./src_server_quotes.js";
+import { escapeHTML } from "./src_server_utils.js";
 
 export function getMapKeyboard(item: any) {
   if (item.type === "Мекеме" && item.address && item.address !== "---") {

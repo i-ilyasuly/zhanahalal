@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cleanText, escapeHTML, getDistance } from '../src/server/utils';
+import { cleanText, escapeHTML, getDistance } from '../src/server/src_server_utils.js';
 
 describe('utils', () => {
   describe('cleanText', () => {

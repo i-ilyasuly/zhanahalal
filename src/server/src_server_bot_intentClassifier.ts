@@ -1,4 +1,4 @@
-import { ai } from "../aiClient.js";
+import { ai } from "./src_server_aiClient.js";
 
 export function shouldClassify(text: string): boolean {
   const trimmed = text.trim();

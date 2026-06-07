@@ -1,7 +1,7 @@
 import admin from "firebase-admin";
 import fs from "fs";
 import path from "path";
-import { cleanText } from "./utils.js";
+import { cleanText } from "./src_server_utils.js";
 
 function sanitizeJsonString(rawJson: string): string {
   let inString = false;

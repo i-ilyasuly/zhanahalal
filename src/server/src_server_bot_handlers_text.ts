@@ -1,13 +1,13 @@
 import { Markup } from "telegraf";
-import { MyContext } from "../types.js";
-import { saveChatHistory } from "../../db.js";
-import { formatDetailMessage, getQuoteCategory, searchData } from "../../search.js";
-import { sendResultWithPhoto, sendSearchPage } from "../helpers.js";
-import { autoRenameTopic } from "../topicRenamer.js";
-import { shouldClassify, classifyQuery } from "../intentClassifier.js";
-import { chatWithAI, getNotFoundReply } from "../aiChat.js";
-import { getQuote } from "../../quotes.js";
-import { streamTextToTelegram } from "../streamUtils.js";
+import { MyContext } from "./src_server_bot_types.js";
+import { saveChatHistory } from "./src_server_db.js";
+import { formatDetailMessage, getQuoteCategory, searchData } from "./src_server_search.js";
+import { sendResultWithPhoto, sendSearchPage } from "./src_server_bot_helpers.js";
+import { autoRenameTopic } from "./src_server_bot_topicRenamer.js";
+import { shouldClassify, classifyQuery } from "./src_server_bot_intentClassifier.js";
+import { chatWithAI, getNotFoundReply } from "./src_server_bot_aiChat.js";
+import { getQuote } from "./src_server_quotes.js";
+import { streamTextToTelegram } from "./src_server_bot_streamUtils.js";
 
 export async function handleTextMessage(ctx: MyContext) {
   let query = ctx.message && ('text' in ctx.message) ? ctx.message.text : "";
@@ -160,4 +160,3 @@ export async function handleTextMessage(ctx: MyContext) {
     }).catch(() => {});
   }
 }
-

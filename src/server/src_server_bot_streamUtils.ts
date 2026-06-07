@@ -1,4 +1,4 @@
-import { closeHTMLTags } from "../agenticImageSearch.js";
+import { closeHTMLTags } from "./src_server_agenticImageSearch.js";
 
 /**
  * Emulates real-time streaming to Telegram using progressive message edits,
@@ -58,4 +58,3 @@ export async function streamTextToTelegram(ctx: any, draftId: number, fullText: 
     text: ""
   }).catch(() => {});
 }
-

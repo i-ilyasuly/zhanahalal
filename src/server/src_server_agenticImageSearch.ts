@@ -1,6 +1,6 @@
 import { Type, FunctionDeclaration } from "@google/genai";
-import { searchData } from "./search.js";
-import { ai } from "./aiClient.js";
+import { searchData } from "./src_server_search.js";
+import { ai } from "./src_server_aiClient.js";
 
 function getAI(): any {
   return ai;
@@ -28,13 +28,13 @@ const getIngredientReportDeclaration: FunctionDeclaration = {
   parameters: {
     type: Type.OBJECT,
     properties: {
-      ingredients: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.STRING
-        },
-        description: "Тағам құрамынан табылған Е-кодтардың немесе қоспалардың тізімі (мысалы: ['E120', 'кармин', 'желатин', 'E322'])"
-      }
+       ingredients: {
+          type: Type.ARRAY,
+          items: {
+             type: Type.STRING
+          },
+          description: "Тағам құрамынан табылған Е-кодтардың немесе қоспалардың тізімі (мысалы: ['E120', 'кармин', 'желатин', 'E322'])"
+       }
     },
     required: ["ingredients"]
   }
@@ -313,7 +313,7 @@ export async function executeAgenticImageSearch(ctx: any, base64Image: string, d
       if (matchedItems.length > 0) {
         finalAnswer = `Дерекқордан іздеу нәтижесінде сәйкес келетін өнімдер табылды.`;
       } else {
-        finalAnswer = `Кешіріңіз, суреттегі өнімді немесе мекемені біздің ресми халал дерекқорымыздан таба алмадық. Құрамын тексеріп, күдікті нәрселердің жоқтығына көз жеткізіңіз.`;
+        finalAnswer = `Кешіріңіз, суреттегі өнімді немесе мекемені біздің ресми халал дерекқорымыздан таба алмадық. Құрамын тексеріп, күдікті нәрселердин жоқтығына көз жеткізіңіз.`;
       }
     }
 

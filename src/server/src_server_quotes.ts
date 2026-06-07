@@ -1,5 +1,5 @@
-import { QURAN_QUOTES } from './quotesQuran.js';
-import { KAZAKH_QUOTES } from './quotesKazakh.js';
+import { QURAN_QUOTES } from './src_server_quotesQuran.js';
+import { KAZAKH_QUOTES } from './src_server_quotesKazakh.js';
 
 const POOL: Record<string, any[]> = {};
 

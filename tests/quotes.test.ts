@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getQuote } from '../src/server/quotes';
+import { getQuote } from '../src/server/src_server_quotes.js';
 
 describe('quotes', () => {
   it('should return empty string for non-existent category', () => {

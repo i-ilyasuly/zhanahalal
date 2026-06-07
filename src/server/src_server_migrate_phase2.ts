@@ -1,4 +1,4 @@
-import { db } from "./db.js";
+import { db } from "./src_server_db.js";
 
 async function runPhase2() {
   console.log("🚀 2-Кезең: Жаңа өрістерді (Schema) бекіту басталды...");

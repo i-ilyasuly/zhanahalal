@@ -1,11 +1,11 @@
 import { Markup } from "telegraf";
-import { MyContext } from "../types.js";
-import { executeAgenticImageSearch } from "../../agenticImageSearch.js";
-import { streamTextToTelegram } from "../streamUtils.js";
-import { getQuoteCategory, formatDetailMessage } from "../../search.js";
-import { getQuote } from "../../quotes.js";
-import { sendResultWithPhoto, sendSearchPage } from "../helpers.js";
-import { autoRenameTopic } from "../topicRenamer.js";
+import { MyContext } from "./src_server_bot_types.js";
+import { executeAgenticImageSearch } from "./src_server_agenticImageSearch.js";
+import { streamTextToTelegram } from "./src_server_bot_streamUtils.js";
+import { getQuoteCategory, formatDetailMessage } from "./src_server_search.js";
+import { getQuote } from "./src_server_quotes.js";
+import { sendResultWithPhoto, sendSearchPage } from "./src_server_bot_helpers.js";
+import { autoRenameTopic } from "./src_server_bot_topicRenamer.js";
 
 export async function handlePhotoMessage(ctx: MyContext) {
   if (!ctx.message || !('photo' in ctx.message)) return;

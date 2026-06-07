@@ -1,5 +1,5 @@
 import { Telegraf, session, Markup } from "telegraf";
-import { MyContext } from "./bot/types.js";
+import { MyContext } from "./src_server_bot_types.js";
 import { 
   sessionSafetyMiddleware, 
   businessMessageMiddleware,
@@ -7,23 +7,23 @@ import {
   autoForumTopicMiddleware,
   forumTopicMiddleware, 
   trackingMiddleware 
-} from "./bot/middlewares.js";
+} from "./src_server_bot_middlewares.js";
 import { 
   handleTextMessage 
-} from "./bot/handlers/text.js";
+} from "./src_server_bot_handlers_text.js";
 import { 
   handleLocationMessage 
-} from "./bot/handlers/location.js";
+} from "./src_server_bot_handlers_location.js";
 import { 
   handlePhotoMessage 
-} from "./bot/handlers/photo.js";
+} from "./src_server_bot_handlers_photo.js";
 import { 
   handleFeedbackAction, 
   handleSearchPageAction, 
   handleItemDetailAction, 
   handleNearbyPageAction, 
   handleIngredientDetailAction 
-} from "./bot/handlers/callbacks.js";
+} from "./src_server_bot_handlers_callbacks.js";
 
 const rawToken = process.env.BOT_TOKEN?.trim() || "";
 let token = rawToken;
@@ -72,7 +72,7 @@ bot.start((ctx) => {
     {
       reply_markup: Markup.keyboard([
         [Markup.button.locationRequest("📍 Менің орнымды жіберу")],
-        ["📍 Айналадағы халал мекемелер"]
+        ["📍 Айналадағы халал Safe мекемелер"]
       ]).resize().reply_markup,
       ...replyOpts
     }

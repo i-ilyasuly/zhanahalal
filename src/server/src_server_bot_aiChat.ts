@@ -1,4 +1,4 @@
-import { ai } from "../aiClient.js";
+import { ai } from "./src_server_aiClient.js";
 
 export async function chatWithAI(text: string, isSymbat: boolean): Promise<string> {
   const prompt = isSymbat

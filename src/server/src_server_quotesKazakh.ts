@@ -50,7 +50,7 @@ export const KAZAKH_QUOTES: Record<string, any[]> = {
   suspicious: [
     {
       kz: "Ас таңдасаң, аяғына қара,\nҚыз таңдасаң, анасына қара.",
-      description: "Адам бір нәрсені түп-төркініне қарап бағалау керек.",
+      description: "Аדם бір нәрсені түп-төркініне қарап бағалау керек.",
       source: "maqal.kz",
       type: "kazakh_proverb",
     },

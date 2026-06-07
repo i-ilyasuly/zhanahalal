@@ -1,4 +1,4 @@
-import './crypto-patch.js';
+import './src_server_crypto-patch.js';
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -88,7 +88,7 @@ if (!fs.existsSync(serviceAccountPath) && process.env.FIREBASE_PRIVATE_KEY && pr
        const cleanKey = pk.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s+/g, '');
        const chunks = cleanKey.match(/.{1,64}/g) || [];
        pk = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
-    }
+     }
 
     const content = JSON.stringify({
       type: "service_account",
@@ -126,7 +126,7 @@ if (hasServiceAccountFile && process.env.NODE_ENV !== 'test') {
     vertexAi = new GoogleGenAI({
       vertexai: true,
       project: saProjectId,
-      location: 'us-central1',
+      location: process.env.GOOGLE_CLOUD_LOCATION || 'us-central1',
       httpOptions: {
         headers: {
           'User-Agent': 'aistudio-build-vertex',
@@ -493,4 +493,3 @@ export async function generateContentStreamFixed(args: any) {
 export const GEMINI_EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-2';
 export const GEMINI_GENERATION_MODEL = process.env.GEMINI_GENERATION_MODEL || 'gemini-2.5-flash';
 export const GEMINI_INTENT_MODEL = process.env.GEMINI_INTENT_MODEL || 'gemini-2.5-flash';
-

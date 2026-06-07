@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { searchData, formatDetailMessage, getQuoteCategory } from '../src/server/search';
-import { cleanText } from '../src/server/utils';
-import { CACHE } from '../src/server/db';
+import { searchData, formatDetailMessage, getQuoteCategory } from '../src/server/src_server_search.js';
+import { cleanText } from '../src/server/src_server_utils.js';
+import { CACHE } from '../src/server/src_server_db.js';
 
 describe('search', () => {
   beforeEach(() => {

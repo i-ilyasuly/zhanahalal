@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { streamTextToTelegram } from '../src/server/bot/streamUtils';
+import { streamTextToTelegram } from '../src/server/src_server_bot_streamUtils.js';
 
 describe('streamTextToTelegram', () => {
     it('should split text into chunks and call sendMessageDraft in order', async () => {

@@ -1,8 +1,8 @@
-import { MyContext } from "../types.js";
-import { sendSearchPage, sendResultWithPhoto, sendNearbyPage } from "../helpers.js";
-import { getQuoteCategory, formatDetailMessage } from "../../search.js";
-import { getQuote } from "../../quotes.js";
-import { CACHE } from "../../db.js";
+import { MyContext } from "./src_server_bot_types.js";
+import { sendSearchPage, sendResultWithPhoto, sendNearbyPage } from "./src_server_bot_helpers.js";
+import { getQuoteCategory, formatDetailMessage } from "./src_server_search.js";
+import { getQuote } from "./src_server_quotes.js";
+import { CACHE } from "./src_server_db.js";
 
 export async function handleFeedbackAction(ctx: MyContext) {
   await ctx.answerCbQuery("Рақмет! Сіздің пікіріңіз қабылданды.", { show_alert: true }).catch(console.error);

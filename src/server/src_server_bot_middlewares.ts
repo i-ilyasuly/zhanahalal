@@ -1,7 +1,7 @@
 import { Middleware, Markup } from "telegraf";
-import { MyContext } from "./types.js";
-import { addUser, incrementUsage } from "../db.js";
-import { escapeHTML } from "../utils.js";
+import { MyContext } from "./src_server_bot_types.js";
+import { addUser, incrementUsage } from "./src_server_db.js";
+import { escapeHTML } from "./src_server_utils.js";
 
 // Ensure session is always initialized
 export const sessionSafetyMiddleware: Middleware<MyContext> = (ctx, next) => {

@@ -1,4 +1,4 @@
-import { db } from "./db.js";
+import { db } from "./src_server_db.js";
 
 async function runMigration() {
   console.log("🚀 Миграция басталды...");
