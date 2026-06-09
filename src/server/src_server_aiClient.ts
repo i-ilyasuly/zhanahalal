@@ -199,7 +199,7 @@ export const ai = {
     },
 
     embedContent: async function(args: any) {
-      try {
+      const fetchFn = async () => {
         const vertexModel = mapModelForVertex(args.model || 'gemini-embedding-2');
         const res = await aiClient.models.embedContent({
           model: vertexModel,
@@ -209,10 +209,8 @@ export const ai = {
         return {
           embeddings: res.embeddings || []
         };
-      } catch (err: any) {
-        console.error("Vertex AI general embedContent error:", err);
-        throw err;
-      }
+      };
+      return retryWithBackoff(fetchFn);
     }
   }
 };
@@ -220,7 +218,7 @@ export const ai = {
 /**
  * Utility function to retry API operations with exponential backoff if a rate limit/quota error is hit.
  */
-async function retryWithBackoff<T>(fn: () => Promise<T>, retries: number = 5, delay: number = 3000): Promise<T> {
+export async function retryWithBackoff<T>(fn: () => Promise<T>, retries: number = 20, delay: number = 5000): Promise<T> {
   try {
     return await fn();
   } catch (error: any) {
@@ -228,17 +226,31 @@ async function retryWithBackoff<T>(fn: () => Promise<T>, retries: number = 5, de
       throw error;
     }
     const errMsg = typeof error?.message === 'string' ? error.message : '';
-    const errStatus = error?.status;
+    const errStatus = typeof error?.status === 'string' ? error.status : '';
+    const errString = (
+      String(error) + " " +
+      errMsg + " " +
+      errStatus + " " +
+      (error?.statusCode || "") + " " +
+      (error?.status_code || "") + " " +
+      JSON.stringify(error)
+    ).toLowerCase();
+
     const isRateLimit = errStatus === 'RESOURCE_EXHAUSTED' || 
-                        errMsg.includes('429') || 
+                        errString.includes('429') || 
                         error?.statusCode === 429 || 
-                        errMsg.toLowerCase().includes('quota exceeded') ||
-                        errMsg.toLowerCase().includes('resource_exhausted');
+                        error?.status === 429 ||
+                        error?.error?.code === 429 ||
+                        errString.includes('quota exceeded') ||
+                        errString.includes('resource_exhausted') ||
+                        errString.includes('quota_exceeded');
                         
     if (isRateLimit) {
-      console.warn(`[⚠️ Rate Limit] Quota exceeded. Retrying in ${delay}ms... (${retries} retries left)`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return retryWithBackoff(fn, retries - 1, delay * 2);
+      const jitter = Math.floor(Math.random() * 8000) + 1000; // 1s to 9s randomized jitter to prevent locking/thundering herd group
+      const finalDelay = delay + jitter;
+      console.log(`[Queue Status] API server busy. Staggering next retry attempt in ${finalDelay}ms... (${retries} attempts remaining).`);
+      await new Promise(resolve => setTimeout(resolve, finalDelay));
+      return retryWithBackoff(fn, retries - 1, delay * 1.5 + 2000);
     }
     throw error;
   }

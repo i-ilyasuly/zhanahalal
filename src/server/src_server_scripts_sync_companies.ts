@@ -361,7 +361,9 @@ export async function runSync(force: boolean = false, onProgress?: (msg: string)
 
       writeSyncLog(`⏳ [Sync Batch] Top ${Math.floor(i / chunkSize) + 1} / ${Math.ceil(itemsToProcess.length / chunkSize)} (${chunk.length} / ${itemsToProcess.length} мекеме)...`, onProgress);
 
-      await Promise.all(chunk.map(async (item) => {
+      await Promise.all(chunk.map(async (item, idx) => {
+        // Stagger each item in the batch by idx * 850ms to flatten the spike of requests hitting Vertex AI
+        await new Promise(resolve => setTimeout(resolve, idx * 850));
         try {
           const idStr = String(item.id);
           const existing = existingMap.get(idStr);
