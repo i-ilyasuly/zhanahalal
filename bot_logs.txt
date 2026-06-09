@@ -1,0 +1,68 @@
+[2026-06-08T23:10:53.349Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:10:54.452Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:10:54.706Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:10:54.706Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:37:57.494Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:37:58.318Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:37:58.547Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:37:58.548Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:38:10.706Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:38:11.510Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:38:11.762Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:38:11.763Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:45:34.213Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:45:35.496Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:45:35.726Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:45:35.730Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:45:52.344Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:45:53.134Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:45:53.471Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:45:53.472Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:47:25.247Z] 📩 Incoming message from Damuhalal: "Ассалаумағалейкум"
+[2026-06-08T23:47:25.485Z] [Intent Routing] Running classification for query: "Ассалаумағалейкум"
+[2026-06-08T23:47:26.864Z] [Intent Routing] Decision: action="search", query="Ассалаумағалейкум", reply=""
+[2026-06-08T23:47:26.864Z] [DB Search] Calling searchData with search query: "Ассалаумағалейкум"
+[2026-06-08T23:47:26.865Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-08T23:47:26.865Z] [searchData] Raw Query: "Ассалаумағалейкум"
+[2026-06-08T23:47:26.865Z] [searchData] Processed Query: "ассалаумағалейкум"
+[2026-06-08T23:47:26.865Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "ассалаумағалейкум"...
+[2026-06-08T23:47:28.278Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-08T23:47:28.278Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-08T23:47:29.274Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-08T23:47:29.275Z] [DB Search] searchData returned 7 items.
+[2026-06-08T23:47:29.275Z] [DB Search] Vector search bypass confidence filter. Total items used directly: 7
+[2026-06-08T23:50:54.100Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:50:55.140Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:50:55.370Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:50:55.371Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:51:04.737Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:51:05.525Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:51:05.779Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:51:05.779Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:55:05.839Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:55:06.675Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:55:06.967Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:55:06.967Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:57:56.603Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:57:57.396Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:57:57.632Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:57:57.632Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:58:07.665Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-08T23:58:08.473Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-08T23:58:08.706Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-08T23:58:08.706Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-08T23:58:57.276Z] 📩 Incoming message from Damuhalal: "Ассалаумағалейкум"
+[2026-06-08T23:58:57.561Z] [Intent Routing] Running classification for query: "Ассалаумағалейкум"
+[2026-06-08T23:58:58.939Z] [Intent Routing] Decision: action="search", query="Ассалаумағалейкум", reply=""
+[2026-06-08T23:58:58.939Z] [DB Search] Calling searchData with search query: "Ассалаумағалейкум"
+[2026-06-08T23:58:58.940Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-08T23:58:58.940Z] [searchData] Raw Query: "Ассалаумағалейкум"
+[2026-06-08T23:58:58.940Z] [searchData] Processed Query: "ассалаумағалейкум"
+[2026-06-08T23:58:58.941Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "ассалаумағалейкум"...
+[2026-06-08T23:59:48.282Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-08T23:59:48.282Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-08T23:59:49.220Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-08T23:59:49.223Z] [DB Search] searchData returned 7 items.
+[2026-06-08T23:59:49.223Z] [DB Search] Vector search bypass confidence filter. Total items used directly: 7

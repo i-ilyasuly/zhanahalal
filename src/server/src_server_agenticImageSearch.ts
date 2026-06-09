@@ -1,44 +1,9 @@
-import { Type, FunctionDeclaration } from "@google/genai";
 import { searchData } from "./src_server_search.js";
 import { ai } from "./src_server_aiClient.js";
 
 function getAI(): any {
   return ai;
 }
-
-// 1. Tool (Function) Declarations
-const searchDatabaseDeclaration: FunctionDeclaration = {
-  name: "searchDatabase",
-  description: "Halal Damu мекемелері мен өнімдерінің дерекқорынан атау (мысалы өнім аты, бренд немесе код) бойынша іздейді. Іздеу нәтижесінде мекеме немесе қоспа туралы мәлімет қайтарылады.",
-  parameters: {
-    type: Type.OBJECT,
-    properties: {
-      query: {
-        type: Type.STRING,
-        description: "Іздеу сұранысы (мысалы бренд атауы, өнім аты, немесе Е-код)"
-      }
-    },
-    required: ["query"]
-  }
-};
-
-const getIngredientReportDeclaration: FunctionDeclaration = {
-  name: "getIngredientReport",
-  description: "Суретте жазылған өнімнің құрамындағы тағамдық қоспалар (E-кодтар немесе атаулар) тізімін жинақтап тексеруге арналған. Жиым ретінде қабылдап, әр қоспаның халал/харам статусын тексереді.",
-  parameters: {
-    type: Type.OBJECT,
-    properties: {
-       ingredients: {
-          type: Type.ARRAY,
-          items: {
-             type: Type.STRING
-          },
-          description: "Тағам құрамынан табылған Е-кодтардың немесе қоспалардың тізімі (мысалы: ['E120', 'кармин', 'желатин', 'E322'])"
-       }
-    },
-    required: ["ingredients"]
-  }
-};
 
 /**
  * Executes a tool's internal logic and tracks matches for native UI presentation

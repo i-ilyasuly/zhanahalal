@@ -1,4 +1,6 @@
 import { Markup } from "telegraf";
+import fs from "fs";
+import path from "path";
 import { MyContext } from "./src_server_bot_types.js";
 import { saveChatHistory } from "./src_server_db.js";
 import { formatDetailMessage, getQuoteCategory, searchData } from "./src_server_search.js";
@@ -8,6 +10,17 @@ import { shouldClassify, classifyQuery } from "./src_server_bot_intentClassifier
 import { chatWithAI, getNotFoundReply } from "./src_server_bot_aiChat.js";
 import { getQuote } from "./src_server_quotes.js";
 import { streamTextToTelegram } from "./src_server_bot_streamUtils.js";
+
+function writeBotLog(text: string) {
+  try {
+    const logPath = path.join(process.cwd(), "bot_logs.txt");
+    const timestamp = new Date().toISOString();
+    fs.appendFileSync(logPath, `[${timestamp}] ${text}\n`);
+    console.log(`📝 [bot_logs.txt] ${text}`);
+  } catch (e) {
+    console.error("Failed to write bot log:", e);
+  }
+}
 
 export async function handleTextMessage(ctx: MyContext) {
   let query = ctx.message && ('text' in ctx.message) ? ctx.message.text : "";
@@ -42,31 +55,24 @@ export async function handleTextMessage(ctx: MyContext) {
     );
   }
   
-  console.log(`📩 Message from ${ctx.from?.username || userId}: ${query}`);
-
-  const draftId = ctx.message?.message_id || Math.floor(Math.random() * 100000) + 1;
-  
-  // Immediately show "Thinking..." indicator
-  if (ctx.chat?.type === 'private') {
-    await ctx.telegram.callApi('sendMessageDraft' as any, {
-      chat_id: ctx.chat.id,
-      message_thread_id: threadId,
-      draft_id: draftId,
-      text: ""
-    }).catch(() => {});
-  } else {
-    await ctx.sendChatAction("typing").catch(() => {});
-  }
-  
-  saveChatHistory(userId, 'user', query, threadId).catch(console.error);
-
   try {
+    const draftId = ctx.message?.message_id || Math.floor(Math.random() * 100000) + 1;
+    console.log(`📩 Message from ${ctx.from?.username || userId}: ${query}`);
+    writeBotLog(`📩 Incoming message from ${ctx.from?.username || userId}: "${query}"`);
+
+    // Immediately show "Thinking..." indicator
+    await ctx.sendChatAction("typing").catch(() => {});
+    
+    saveChatHistory(userId, 'user', query, threadId).catch(console.error);
+
     let searchQuery = query;
     let goToChat = false;
     let chatReply = "";
 
     if (shouldClassify(query)) {
+      writeBotLog(`[Intent Routing] Running classification for query: "${query}"`);
       const { action, query: extractedQuery, reply: classifierReply } = await classifyQuery(query, isSymbat);
+      writeBotLog(`[Intent Routing] Decision: action="${action}", query="${extractedQuery || ""}", reply="${classifierReply || ""}"`);
       if (action === "chat") {
         goToChat = true;
         chatReply = classifierReply;
@@ -76,6 +82,7 @@ export async function handleTextMessage(ctx: MyContext) {
     }
 
     if (goToChat) {
+      writeBotLog(`[Chat Flow] Processing chat reply. length: ${chatReply?.length || 0}`);
       const aiReply = chatReply || await chatWithAI(query, isSymbat);
       await saveChatHistory(userId, 'model', aiReply, threadId).catch(console.error);
       
@@ -95,12 +102,14 @@ export async function handleTextMessage(ctx: MyContext) {
     }
 
     // ── DIRECT DB SEARCH (No AI overhead just for searching!) ──
+    writeBotLog(`[DB Search] Calling searchData with search query: "${searchQuery}"`);
     const foundItems = await searchData(searchQuery);
+    writeBotLog(`[DB Search] searchData returned ${foundItems?.length || 0} items.`);
 
     if (foundItems && foundItems.length > 0) {
-      const exactItems = foundItems.filter((i: any) => i.confidence === 'exact');
-      const fuzzyItems = foundItems.filter((i: any) => i.confidence === 'fuzzy');
-      const allItems = [...exactItems, ...fuzzyItems];
+      // ⚠️ ЖАҢА ВЕКТОРЛЫҚ ІЗДЕУ НӘТИЖЕЛЕРІ ҮШІН СҮЗГІНІ АЙНАЛЫП ӨТЕМІЗ (BYPASS CONFIDENCE FILTER)
+      const allItems = foundItems;
+      writeBotLog(`[DB Search] Vector search bypass confidence filter. Total items used directly: ${allItems.length}`);
 
       if (allItems.length === 1) {
         const item = allItems[0];
@@ -153,6 +162,7 @@ export async function handleTextMessage(ctx: MyContext) {
     
     
   } catch (err: any) {
+    writeBotLog(`❌ [ERROR IN TEXT HANDLER]: ${err.message || String(err)}\nStack: ${err.stack || ""}`);
     console.error("Text handling error:", err);
     await ctx.reply("😔 Сұранысты өңдеу кезінде қате кетті. Сәл күте тұрып қайталап көріңіз.", {
       message_thread_id: threadId,

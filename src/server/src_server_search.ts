@@ -1,8 +1,41 @@
 import * as fuzz from "fuzzball";
-import { CACHE, loadCache } from "./src_server_db.js";
+import admin from "firebase-admin";
+import fs from "fs";
+import path from "path";
+import { FieldValue } from "firebase-admin/firestore";
+import { CACHE, loadCache, db } from "./src_server_db.js";
 import { escapeHTML, getDistance } from "./src_server_utils.js";
+import { ai, GEMINI_EMBEDDING_MODEL, getQueryEmbeddingVertex } from "./src_server_aiClient.js";
 
 type MatchConfidence = "exact" | "fuzzy" | "none";
+
+function writeBotLog(text: string) {
+  try {
+    const logPath = path.join(process.cwd(), "bot_logs.txt");
+    const timestamp = new Date().toISOString();
+    fs.appendFileSync(logPath, `[${timestamp}] [searchData] ${text}\n`);
+    console.log(`📝 [bot_logs.txt] ${text}`);
+  } catch (e) {
+    console.error("Failed to write bot log in search:", e);
+  }
+}
+
+async function getQueryEmbedding(text: string): Promise<number[] | null> {
+  const cleaned = text.trim();
+  if (!cleaned) return null;
+  try {
+    const values = await getQueryEmbeddingVertex(cleaned);
+    if (values) {
+      return values;
+    }
+  } catch (err: any) {
+    writeBotLog(`⚠️ Query embedding error: ${err.message || String(err)}`);
+    if (err.stack) {
+      writeBotLog(`Stack: ${err.stack}`);
+    }
+  }
+  return null;
+}
 
 // ── PYTHON-BASED TEXT CLEANING AND VARIANT GENERATION ──
 
@@ -59,7 +92,7 @@ export function isMatch(queryText: string, title: string): MatchConfidence {
   // ── 1. ТІКЕЛЕЙ SUBSTRING ТЕКСЕРУ ─────────────────────────────────────
   for (const varStr of variants) {
     const vClean = cleanTextPython(varStr);
-    if (vClean.length > 3) {
+    if (vClean.length >= 2) {
       const result = isSubstringMatch(vClean, tClean);
       if (result !== 'none') {
         return result;
@@ -67,7 +100,7 @@ export function isMatch(queryText: string, title: string): MatchConfidence {
     }
 
     // Partial ratio
-    if (fuzz.partial_ratio(varStr, title.toLowerCase()) > 80) {
+    if (fuzz.partial_ratio(varStr, title.toLowerCase()) >= 50) {
       return 'exact';
     }
   }
@@ -85,19 +118,19 @@ export function isMatch(queryText: string, title: string): MatchConfidence {
   ]);
   
   const rawWords = queryText.toLowerCase().replace(/-/g, ' ').split(/\s+/);
-  const words = rawWords.filter(w => w.length > 3 && !stopWords.has(w));
+  const words = rawWords.filter(w => w.length >= 2 && !stopWords.has(w));
 
   for (const word of words) {
     const wVariants = getVariants(word);
     for (const wVar of wVariants) {
       const wClean = cleanTextPython(wVar);
-      if (wClean.length > 3) {
+      if (wClean.length >= 2) {
         const result = isSubstringMatch(wClean, tClean);
         if (result !== 'none') {
           return result;
         }
       }
-      if (fuzz.partial_ratio(wVar, title.toLowerCase()) > 80) {
+      if (fuzz.partial_ratio(wVar, title.toLowerCase()) >= 50) {
         return 'exact';
       }
     }
@@ -108,17 +141,17 @@ export function isMatch(queryText: string, title: string): MatchConfidence {
     const vClean = cleanTextPython(varStr);
     const r = fuzz.ratio(vClean, tClean);
     if (r >= 85) return 'exact';
-    if (r >= 72) return 'fuzzy';
+    if (r >= 50) return 'fuzzy';
   }
 
   for (const word of words) {
     const wVariants = getVariants(word);
     for (const wVar of wVariants) {
       const wClean = cleanTextPython(wVar);
-      if (wClean.length >= 4) {
+      if (wClean.length >= 2) {
         const r = fuzz.ratio(wClean, tClean);
         if (r >= 83) return 'exact';
-        if (r >= 70) return 'fuzzy';
+        if (r >= 50) return 'fuzzy';
       }
     }
   }
@@ -156,48 +189,195 @@ function eVariantInRange(variant: string | null, titleRaw: string): boolean {
   return false;
 }
 
+export function hasCompanyOrCityKeywords(queryText: string): boolean {
+  const lowercase = queryText.toLowerCase();
+  const companyKeywords = [
+    "орын", "кафе", "дәмхана", "ресторан", "жегім келеді", "ішетін", "тамақтанатын",
+    "донер", "дөнер", "бургер", "пицца", "кофе", "шай", "суши", "fast food", "фастфуд",
+    "стейк", "плов", "лаунж", "бар", "кухня", "тағам", "тагам"
+  ];
+  const cityNames = [
+    "алматы", "астана", "шымкент", "атырау", "ақтау", "актау", "ақтөбе", "актобе",
+    "қарағанды", "караганды", "тараз", "павлодар", "өскемен", "усть-каменогорск",
+    "семей", "орал", "уральск", "қостанай", "костанай", "қызылорда", "кызылорда",
+    "түркістан", "туркистан", "көкшетау", "кокшетау", "талдықорған", "талдыкорган",
+    "жезқазған", "жезказган", "петропавл", "петропавловск"
+  ];
+
+  const words = lowercase.split(/[^a-z0-9\u0400-\u04FF]/i).filter(Boolean);
+  for (const word of words) {
+    if (companyKeywords.includes(word) || cityNames.includes(word)) {
+      return true;
+    }
+  }
+
+  for (const phrase of ["жегім келеді", "ішетін жер", "тамақтанатын орын", "деген орын"]) {
+    if (lowercase.includes(phrase)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function isStrictIngredientQuery(queryText: string): boolean {
+  const lowercase = queryText.toLowerCase().trim();
+  
+  const [eBase] = parseECode(queryText);
+  if (eBase !== null) {
+    return true;
+  }
+
+  const chemicalSuffixes = [
+    "ид", "ат", "ит", "ол", "ин", "за", "оза", "ан"
+  ];
+  
+  const chemicalWords = [
+    "су", "тұз", "сода", "желатин", "кармин", "лецитин", "глицерин", "пектин", "меланж", "пальма",
+    "қышқылы", "кислота", "эмульгатор", "краситель", "консервант", "бояу", "бояғыш", "қоспа", 
+    "дәмдеуіш", "стабилизатор", "антиоксидант", "керосин", "парафин", "вазелин", "стеарин",
+    "токоферол", "аскорбин", "аспартам", "сахарин", "таурин", "кофеин", "глюкоза", "фруктоза",
+    "сахароза", "лактоза", "мальтоза", "декстроза", "ксилит", "сорбит", "агар", "камедь", 
+    "гуар", "ксантан", "іріткі", "сычуг", "реннет", "пепсин", "май", "масло", "дрожжи", "ашытқы"
+  ];
+
+  const words = lowercase.split(/[^a-z0-9\u0400-\u04FF]/i).filter(Boolean);
+  
+  if (words.includes("кофе") || lowercase === "кофе" || lowercase.match(/^кофе\s*(ма|ме|ба|бе|па|пе)?$/)) {
+    return false;
+  }
+
+  for (const word of words) {
+    if (chemicalWords.includes(word)) {
+      return true;
+    }
+    
+    if (word.length >= 5) {
+      for (const suffix of chemicalSuffixes) {
+        if (word.endsWith(suffix)) {
+          if (!["кафе", "дүкен", "мекен", "ертен", "сеул", "бөтел"].includes(word)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
 // ── RE-IMPLEMENTED SEARCH DATA FLOW ──
 
-export async function searchData(queryText: string) {
+export async function searchData(queryText: string, userLat?: number, userLon?: number) {
   if (!CACHE.loaded) {
     await loadCache();
   }
 
+  // Verbose Diagnostic Logging
+  writeBotLog("\n--- 🔍 [Search Diagnostic Start] ---");
+  writeBotLog(`Raw Query: "${queryText}"`);
+
+  const stopWordsObj = new Set([
+    'халал', 'харам', 'рұқсат', 'ма', 'ме', 'ба', 'бе', 'па', 'пе',
+    'деген', 'қандай', 'осы', 'точно', 'күдікті', 'емес',
+    'өнім', 'оним', 'onim', 'тамақ', 'азық', 'дүкен', 'дукен',
+    'мекеме', 'өндіруші', 'сұрайын', 'айтшы', 'білгім', 'келеді',
+    'жолы', 'бұлай', 'деген', 'жазады', 'жазды', 'сенен', 'маған',
+    'қалай', 'калай', 'жағдай', 'жагдай', 'жағдайыңыз', 'жагдайыныз',
+    'аман', 'сау', 'сәлем', 'салем', 'привет', 'кім', 'ким', 'неге',
+    'қалайсың', 'қалайсыз', 'қалайсын', 'рақмет', 'рахмет'
+  ]);
+  const rawWordsForClean = queryText.toLowerCase().replace(/-/g, ' ').split(/\s+/);
+  const processedQuery = rawWordsForClean.filter(w => !stopWordsObj.has(w)).join(" ").trim() || queryText;
+  writeBotLog(`Processed Query: "${processedQuery}"`);
+
   const results: any[] = [];
 
   // ── 1. E-КОД ІЗДЕУ ───────────────────────────────────────────────────────
-  const [eBase, eVariant] = parseECode(queryText);
-  if (eBase) {
-    for (const i of CACHE.ingredients) {
-      if (i.is_active === false) continue;
-      const title = i.title || "";
-      const name = i.name_kz || "";
-      const titleNorm = cleanTextPython(title).replace(/е/g, 'e');
-      const nameNorm = cleanTextPython(name).replace(/е/g, 'e');
-      const baseInTitle = eBase.length > 2 && titleNorm.includes(eBase);
-      const baseInName = eBase.length > 2 && nameNorm.includes(eBase);
+  if (!hasCompanyOrCityKeywords(queryText)) {
+    const [eBase, eVariant] = parseECode(queryText);
+    if (eBase) {
+      writeBotLog(`🧪 [E-Code Match] E-код табылды: ${eBase}`);
+      for (const i of CACHE.ingredients) {
+        if (i.is_active === false) continue;
+        const title = i.title || "";
+        const name = i.name_kz || "";
+        const titleNorm = cleanTextPython(title).replace(/е/g, 'e');
+        const nameNorm = cleanTextPython(name).replace(/е/g, 'e');
+        const baseInTitle = eBase.length > 2 && titleNorm.includes(eBase);
+        const baseInName = eBase.length > 2 && nameNorm.includes(eBase);
 
-      if (baseInTitle || baseInName) {
-        if (eVariantInRange(eVariant, title)) {
-          results.push({ 
-            ...i, 
-            type: "Қоспа", 
-            title: (i.code || "") + " - " + (i.name_kz || ""), 
-            confidence: 'exact' 
-          });
+        if (baseInTitle || baseInName) {
+          if (eVariantInRange(eVariant, title)) {
+            results.push({ 
+              ...i, 
+              type: "Қоспа", 
+              title: (i.code || "") + " - " + (i.name_kz || ""), 
+              confidence: 'exact' 
+            });
+          }
         }
       }
+      if (results.length > 0) {
+        writeBotLog(`🧪 [E-Code Results] ${results.length} қоспа табылды.`);
+        writeBotLog("--- 🔍 [Search Diagnostic End] ---\n");
+        return results.sort((a, b) => {
+          const scoreA = a.confidence === "exact" ? 0 : 1;
+          const scoreB = b.confidence === "exact" ? 0 : 1;
+          return scoreA - scoreB;
+        });
+      }
     }
-    if (results.length > 0) {
-      return results.sort((a, b) => {
-        const scoreA = a.confidence === "exact" ? 0 : 1;
-        const scoreB = b.confidence === "exact" ? 0 : 1;
-        return scoreA - scoreB;
-      });
-    }
+  } else {
+    writeBotLog(`⏭️ [E-Code search skipped] Query contains company or city keywords.`);
   }
 
-  // ── 2. МЕКЕМЕЛЕР ІЗДЕУ ───────────────────────────────────────────────────
+  // ── 2. МЕКЕМЕЛЕР ГИБРИДТІ ІЗДЕУ (HYBRID SEMANTIC + FUZZY SEARCH) ───────────
+  let vectorResults: any[] = [];
+  try {
+    writeBotLog(`📡 [Vector Search] Ембеддинг жасалуда: "${processedQuery}"...`);
+    const queryVector = await getQueryEmbedding(processedQuery);
+    if (queryVector && queryVector.length > 0) {
+      writeBotLog(`Embedding generated successfully. Vector length: ${queryVector.length}`);
+      
+      const wrappedQueryVector = FieldValue.vector(queryVector);
+
+      writeBotLog(`📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...`);
+      const vectorQuery = db.collection('search_companies')
+        .findNearest({
+          vectorField: 'search_fields.embedding',
+          queryVector: wrappedQueryVector,
+          distanceMeasure: 'COSINE',
+          limit: 10
+        });
+      const vectorSnapshot = await vectorQuery.get();
+      writeBotLog(`📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: ${vectorSnapshot.docs.length}`);
+
+      for (const doc of vectorSnapshot.docs) {
+        const data = doc.data();
+        if (data.is_active === false) continue;
+        
+        vectorResults.push({
+          ...data,
+          id: doc.id,
+          type: "Meкеме",
+          title: data.title || "",
+          semanticMatch: true,
+          _titleStr: data.title || ""
+        });
+      }
+    } else {
+      writeBotLog("⚠️ Embedding returned null or empty vector.");
+    }
+  } catch (err: any) {
+    writeBotLog(`FIRESTORE VECTOR SEARCH ERROR DETECTED: ${err.message || String(err)}`);
+    if (err.stack) {
+      console.error(err.stack);
+    }
+    throw err;
+  }
+
+  const fuzzyResults: any[] = [];
   for (const c of CACHE.companies) {
     if (c.is_active === false) continue;
     const title = c.title || "";
@@ -209,52 +389,126 @@ export async function searchData(queryText: string) {
 
     const conf = isMatch(queryText, searchField);
     if (conf !== "none") {
-      results.push({ 
+      fuzzyResults.push({ 
         ...c, 
         type: "Мекеме", 
         title: c._titleStr || title, 
-        confidence: conf 
+        confidence: conf,
+        fuzzyMatch: true
       });
+    }
+  }
+
+  const mergedMap = new Map<string, any>();
+
+  for (const fr of fuzzyResults) {
+    mergedMap.set(String(fr.id), {
+      ...fr,
+      score: fr.confidence === "exact" ? 80 : 40,
+      fuzzyMatched: true
+    });
+  }
+
+  for (const vr of vectorResults) {
+    const idStr = String(vr.id);
+    const existing = mergedMap.get(idStr);
+    if (existing) {
+      existing.score = 100;
+      existing.semanticMatched = true;
+    } else {
+      mergedMap.set(idStr, {
+        ...vr,
+        score: 60,
+        semanticMatched: true,
+        confidence: "fuzzy"
+      });
+    }
+  }
+
+  let combinedCompanies = Array.from(mergedMap.values());
+
+  // Сұрыптаймыз (score бойынша кему ретімен)
+  combinedCompanies.sort((a, b) => b.score - a.score);
+
+  // Геолокациялық сүзгі (Егер пайдаланушы координаттарын ұсынған болса)
+  if (userLat !== undefined && userLon !== undefined && !isNaN(userLat) && !isNaN(userLon)) {
+    console.log(`📍 [Location Filter] Пайдаланушы координаты бойынша қашықтық есептелуде: Lat ${userLat}, Lon ${userLon}...`);
+    for (const item of combinedCompanies) {
+      let itemLat: number | null = null;
+      let itemLon: number | null = null;
+
+      if (item.lat && item.lon) {
+        itemLat = typeof item.lat === "string" ? parseFloat(item.lat) : item.lat;
+        itemLon = typeof item.lon === "string" ? parseFloat(item.lon) : item.lon;
+      } else if (item.coordinates && typeof item.coordinates === "object") {
+        itemLat = item.coordinates.latitude || item.coordinates._latitude;
+        itemLon = item.coordinates.longitude || item.coordinates._longitude;
+      }
+
+      if (itemLat !== null && itemLon !== null && !isNaN(itemLat) && !isNaN(itemLon)) {
+        item.distanceObj = getDistance(userLat, userLon, itemLat, itemLon);
+      } else {
+        item.distanceObj = Infinity;
+      }
+    }
+
+    combinedCompanies.sort((a, b) => {
+      if (a.distanceObj !== b.distanceObj) {
+        return a.distanceObj! - b.distanceObj!;
+      }
+      return b.score! - a.score!;
+    });
+  }
+
+  // Сұрыпталған үздік 5-7 нәтижені аламыз
+  const topCompanies = combinedCompanies.slice(0, 7);
+
+  for (const c of topCompanies) {
+    results.push({
+      ...c,
+      type: "Мекеме" // Ensure uniform type naming
+    });
+  }
+
+  // ── 3. ҚОСПАЛАР ІЗДЕУ ───────────────────────────────────────────────────
+  if (isStrictIngredientQuery(queryText) && !hasCompanyOrCityKeywords(queryText)) {
+    console.log(`🧪 [Ingredients Search] Қоспаларды іздеу басталуда...`);
+    for (const i of CACHE.ingredients) {
+      if (i.is_active === false) continue;
+      const title = i.code || i.title || "";
+      const name = i.name_kz || "";
+      const nameRu = i.name_ru || "";
+      const aliases = Array.isArray(i.aliases) ? i.aliases.join(" ") : "";
+      const searchName = `${name} ${nameRu} ${aliases}`.trim();
+
+      const confTitle = title ? isMatch(queryText, title) : 'none';
+      const confName = searchName ? isMatch(queryText, searchName) : 'none';
+
+      let confidence: MatchConfidence = 'none';
+      if (confTitle === 'exact' || confName === 'exact') {
+        confidence = 'exact';
+      } else if (confTitle === 'fuzzy' || confName === 'fuzzy') {
+        confidence = 'fuzzy';
+      } else {
+        continue;
+      }
+
+      const formattedTitle = (i.code || "") + " - " + (i.name_kz || "");
+      if (!results.some(r => r.title === formattedTitle)) {
+        results.push({ 
+          ...i, 
+          type: "Қоспа", 
+          title: formattedTitle, 
+          confidence 
+        });
+      }
+
       if (results.length >= 20) {
         break;
       }
     }
-  }
-
-  // ── 3. ҚОСПАЛАР ІЗДЕУ ───────────────────────────────────────────────────
-  for (const i of CACHE.ingredients) {
-    if (i.is_active === false) continue;
-    const title = i.code || i.title || "";
-    const name = i.name_kz || "";
-    const nameRu = i.name_ru || "";
-    const aliases = Array.isArray(i.aliases) ? i.aliases.join(" ") : "";
-    const searchName = `${name} ${nameRu} ${aliases}`.trim();
-
-    const confTitle = title ? isMatch(queryText, title) : 'none';
-    const confName = searchName ? isMatch(queryText, searchName) : 'none';
-
-    let confidence: MatchConfidence = 'none';
-    if (confTitle === 'exact' || confName === 'exact') {
-      confidence = 'exact';
-    } else if (confTitle === 'fuzzy' || confName === 'fuzzy') {
-      confidence = 'fuzzy';
-    } else {
-      continue;
-    }
-
-    const formattedTitle = (i.code || "") + " - " + (i.name_kz || "");
-    if (!results.some(r => r.title === formattedTitle)) {
-      results.push({ 
-        ...i, 
-        type: "Қоспа", 
-        title: formattedTitle, 
-        confidence 
-      });
-    }
-
-    if (results.length >= 20) {
-      break;
-    }
+  } else {
+    console.log(`⏭️ [Ingredients Search skipped] Not a strict ingredient query or contains company/city keywords.`);
   }
 
   results.sort((a, b) => {

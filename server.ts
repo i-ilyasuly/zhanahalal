@@ -1,4 +1,5 @@
 import express from "express";
+import admin from "firebase-admin";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -23,15 +24,25 @@ const __dirname = path.dirname(__filename);
 import { loadCache } from "./src/server/src_server_db.js";
 import { bot } from "./src/server/src_server_bot.js";
 import { searchData } from "./src/server/src_server_search.js";
-import { runSync } from "./src/server/src_server_scripts_sync_companies.js";
+import { runSync, lastSyncError } from "./src/server/src_server_scripts_sync_companies.js";
 
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
   // Load Firestore Data into Memory (Non-blocking)
-  loadCache().then(() => {
+  loadCache().then(async () => {
     console.log("📦 Cache pre-loaded.");
+    if (process.env.NODE_ENV !== "production") {
+      console.log("🔌 [Startup Sync] Даму кезеңі: бірінші жүктелудегі автоматты синхрондау іске қосылды...");
+      try {
+        await runSync();
+        await loadCache(true);
+        console.log("✅ [Startup Sync] Бірінші синхрондау сәтті аяқталды!");
+      } catch (e) {
+        console.error("❌ [Startup Sync] Бірінші синхрондау барысында қате шықты:", e);
+      }
+    }
   }).catch(e => console.error("Initial cache load failed:", e));
 
   // Schedule automatic sync at 03:00 AM (Astana/Almaty time) every day
@@ -51,29 +62,47 @@ async function startServer() {
   // Start Telegram Bot via Long Polling
   if (process.env.BOT_TOKEN) {
     const masked = process.env.BOT_TOKEN.substring(0, 6) + "..." + process.env.BOT_TOKEN.slice(-4);
+    const writeLog = (txt: string) => {
+      try {
+        fs.appendFileSync(path.join(process.cwd(), "bot_logs.txt"), `[${new Date().toISOString()}] [Startup] ${txt}\n`);
+      } catch (e) {}
+    };
+    writeLog(`Bot launch attempt. Token: ${masked}`);
     console.log(`📡 [Telegram Polling] Ботты іске қосу әрекеті (Masked: ${masked})...`);
     
     // Explicitly delete any existing webhook to clear conflicting configuration
     bot.telegram.deleteWebhook({ drop_pending_updates: true })
-      .then(() => {
+      .then(async () => {
+        writeLog("Old webhook deleted. Fetching Bot details before launch...");
         console.log("🧹 Кез келген ескі Webhook сәтті өшірілді.");
-        return bot.launch({ dropPendingUpdates: true });
-      })
-      .then(() => {
-        console.log("✅✅✅ Telegram Бот long-polling режимінде сәтті қосылды.");
-        return bot.telegram.getMe();
-      })
-      .then((me) => {
+        const me = await bot.telegram.getMe();
+        writeLog(`Bot identity verified: @${me.username} (${me.id})`);
         console.log(`🤖 Бот сәйкестігі расталды: @${me.username} (${me.id})`);
+
+        // Launch without holding startup promise
+        bot.launch({ dropPendingUpdates: true }).then(() => {
+          writeLog("Bot polling stopped dynamically.");
+        }).catch(err => {
+          writeLog(`BOT RUNTIME EXCEPTION: ${err.message || String(err)}`);
+          console.error("❌ bot.launch runtime error:", err);
+        });
+
+        writeLog("Telegram Bot successfully launched in background long-polling mode.");
+        console.log("✅✅✅ Telegram Бот long-polling режимінде сәтті қосылды.");
       })
       .catch(e => {
+        writeLog(`BOT LAUNCH ERROR: ${e.message}\n${e.stack}`);
         if (e.message && e.message.includes("409")) {
+          writeLog("CONFLICT 409: Another bot instance is currently running with this token!");
           console.warn("\n⚠️⚠️⚠️ [TELEGRAM CONFLICT 409] ⚠️⚠️⚠️\nБотты іске қосу барысында 409 (Conflict) қатесі шықты. Бұл дегеніміз - дәл осы Token-мен басқа серверде боттың тағы бір нұсқасы қатар жұмыс істеп тұр.\nTelegram бір уақытта тек БІР ҒАНА бот нұсқасына хабарлама алуға (polling) рұқсат береді.\n");
         } else {
           console.error("❌❌❌ Telegram bot failed to launch:", e);
         }
       });
   } else {
+    try {
+      fs.appendFileSync(path.join(process.cwd(), "bot_logs.txt"), `[${new Date().toISOString()}] [Startup] ERROR: BOT_TOKEN not found!\n`);
+    } catch (e) {}
     console.error("⚠️ BOT_TOKEN not found in process.env!");
   }
 
@@ -82,6 +111,11 @@ async function startServer() {
   process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
   app.use(express.json());
+
+  // Zero-dependency Ping (Saves developer from waiting for Firebase/loading)
+  app.get("/api/ping", (req, res) => {
+    res.json({ message: "pong", status: "online" });
+  });
 
   // API Status Endpoint
   app.get("/api/status", (req, res) => {
@@ -112,6 +146,199 @@ async function startServer() {
 
   // --- Admin API Routes ---
   const { db } = await import("./src/server/src_server_db.js"); // lazy load since it's exported from db.js
+
+  app.get("/api/admin/sync-now", async (req, res) => {
+    const force = req.query.force === "true";
+    console.log(`📥 [Manual Trigger] Қолмен синхрондау сұранысы қабылданды (GET /api/admin/sync-now, force: ${force})...`);
+    
+    // Set headers for HTTP Streaming (chunked response)
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Transfer-Encoding', 'chunked');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    try {
+      res.write("🚀 [Sync] Синхрондау процесі басталды...\n");
+      
+      await runSync(force, (msg: string) => {
+        res.write(msg);
+      });
+
+      res.write("\n🔄 [Sync] Кеш оқылуда...\n");
+      await loadCache(true);
+      res.write("✅ [Sync] Деректер мен кеш сәтті жаңартылды!\n");
+      res.end();
+    } catch (e: any) {
+      console.error("❌ [Manual Trigger Error] Қолмен синхрондау сәтсіз аяқталды:", e);
+      res.write(`\n❌ [Sync Error] Қате: ${e.message || String(e)}\n`);
+      res.end();
+    }
+  });
+
+  app.get("/api/admin/sync-status", async (req, res) => {
+    console.log("📊 [Admin Sync Status] Статусты есептеу басталды...");
+    try {
+      // 1. Жалпы саны және 2. Векторы барлардың саны
+      // select() арқылы тек қажетті өрістерді оқып, жылдамдық пен жадты үнемдейміз
+      const snapshot = await db.collection("search_companies")
+        .select("search_fields.embedding", "updated_at", "title")
+        .get();
+
+      const total_companies = snapshot.size;
+      let embedded_companies = 0;
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        const embValue = data.search_fields?.embedding;
+        if (embValue) {
+          if (Array.isArray(embValue)) {
+            if (embValue.length > 0) {
+              embedded_companies++;
+            }
+          } else if (typeof embValue === "object") {
+            embedded_companies++;
+          }
+        }
+      }
+
+      // 3. Деректер құрылымын тексеру (Сынақ үлгісі ретінде алғашқы 5 мекеме)
+      const sample_companies = snapshot.docs.slice(0, 5).map(doc => {
+        const data = doc.data();
+        const raw_updated_at = data.updated_at;
+        let updated_at_type: string = typeof raw_updated_at;
+        if (raw_updated_at instanceof Date) {
+          updated_at_type = "Date object (Date)";
+        } else if (raw_updated_at && typeof raw_updated_at === "object") {
+          updated_at_type = `Object (${raw_updated_at.constructor.name})`;
+        }
+
+        return {
+          id: doc.id,
+          title: data.title || "",
+          updated_at: raw_updated_at,
+          updated_at_type: updated_at_type,
+          has_embedding: !!(data.search_fields?.embedding)
+        };
+      });
+
+      res.status(200).json({
+        success: true,
+        status: "Diagnostic finished",
+        total_companies,
+        embedded_companies,
+        last_sync_error: lastSyncError || null,
+        sample_companies
+      });
+    } catch (e: any) {
+      console.error("❌ [Admin Sync Status Error]:", e);
+      res.status(500).json({
+        success: false,
+        error: e.message || String(e),
+        last_sync_error: lastSyncError || null,
+        stack: e.stack || ""
+      });
+    }
+  });
+
+  app.get("/api/admin/real-search", async (req, res) => {
+    const q = req.query.q as string;
+    console.log(`🔍 [Admin Real Search] q: "${q}" ізделуде...`);
+    try {
+      const results = await searchData(q || "кофе");
+      res.status(200).json({ success: true, count: results.length, results });
+    } catch (e: any) {
+      console.error("❌ [Admin Real Search Error]:", e);
+      res.status(500).json({ success: false, error: e.message || String(e), stack: e.stack || "" });
+    }
+  });
+
+  app.get("/api/admin/test-search", async (req, res) => {
+    const q = req.query.q as string;
+    if (q) {
+      console.log(`🔍 [Admin Test Search] Running vector search directly for query: "${q}"...`);
+      try {
+        const results = await searchData(q);
+        return res.status(200).json({ success: true, count: results.length, query: q, results });
+      } catch (e: any) {
+        console.error("❌ [Admin Test Search Direct Error]:", e);
+        return res.status(500).json({ success: false, error: e.message || String(e), stack: e.stack || "" });
+      }
+    }
+
+    console.log("🔍 [Admin Test Search] Диагностикалық тексеру басталды...");
+    const report: any = {
+      status: "Diagnostic finished",
+      step1_firestore: "NOT RUN",
+      step2_gemini: "NOT RUN",
+      step3_vector_query: "NOT RUN"
+    };
+
+    // 1-ҚАДАМ: FIRESTORE БАЗАСЫМЕН БАЙЛАНЫС (Test Connection)
+    try {
+      const snap = await db.collection("search_companies").limit(1).get();
+      if (!snap.empty) {
+        report.step1_firestore = `OK (Found doc ID: ${snap.docs[0].id})`;
+      } else {
+        report.step1_firestore = "OK (Collection is empty, connection works)";
+      }
+    } catch (e: any) {
+      report.step1_firestore = `FAILED: ${e.message || String(e)}`;
+    }
+
+    // 2-ҚАДАМ: GEMINI EMBEDDING API СЫНАУ (Test Embedding)
+    let testVector: number[] | null = null;
+    try {
+      const { ai, GEMINI_EMBEDDING_MODEL } = await import("./src/server/src_server_aiClient.js");
+      const embeddingResponse = await ai.models.embedContent({
+        model: GEMINI_EMBEDDING_MODEL,
+        contents: "тест"
+      });
+      const values = embeddingResponse?.embeddings?.[0]?.values || (embeddingResponse as any)?.embedding?.values;
+      if (values && values.length > 0) {
+        testVector = values;
+        report.step2_gemini = `OK (Vector length: ${values.length})`;
+      } else {
+        report.step2_gemini = "FAILED: Embedding returned empty values";
+      }
+    } catch (e: any) {
+      report.step2_gemini = `FAILED: ${e.message || String(e)}`;
+    }
+
+    // 3-ҚАДАМ: ВЕКТОРЛЫҚ СҰРАНЫСТЫ СЫНАУ (Test Vector Query)
+    if (testVector) {
+      try {
+        let wrappedTestVector: any = testVector;
+        try {
+          if (admin.firestore && admin.firestore.FieldValue && typeof (admin.firestore.FieldValue as any).vector === "function") {
+            wrappedTestVector = (admin.firestore.FieldValue as any).vector(testVector);
+            console.log("📡 [FieldValue.vector] testVector wrapped successfully in diagnostic.");
+          } else if ((admin.firestore as any).VectorValue && typeof (admin.firestore as any).VectorValue.create === "function") {
+            wrappedTestVector = (admin.firestore as any).VectorValue.create(testVector);
+            console.log("📡 [VectorValue.create] testVector wrapped successfully in diagnostic.");
+          }
+        } catch (e: any) {
+          console.warn("⚠️ Diagnostic queryVector wrapping error (using raw array instead):", e.message || String(e));
+        }
+
+        const vectorQuery = db.collection('search_companies')
+          .findNearest({
+            vectorField: 'search_fields.embedding',
+            queryVector: wrappedTestVector,
+            distanceMeasure: 'COSINE',
+            limit: 10
+          });
+        const vectorSnapshot = await vectorQuery.get();
+        report.step3_vector_query = `OK (Found ${vectorSnapshot.docs.length} companies)`;
+      } catch (e: any) {
+        report.step3_vector_query = `FAILED: ${e.message || String(e)}`;
+        if (e.stack) {
+          console.error("❌ Diagnostic step 3 error trace:", e.stack);
+        }
+      }
+    } else {
+      report.step3_vector_query = "FAILED: Skipped because step 2 (embedding) failed";
+    }
+
+    res.status(200).json(report);
+  });
 
   app.get("/api/admin/:collection", async (req, res) => {
     const { collection } = req.params;

@@ -18,6 +18,7 @@
   "dependencies": {
     "@base-ui/react": "^1.4.0",
     "@fontsource-variable/geist": "^5.2.8",
+    "@google-cloud/vertexai": "^1.12.0",
     "@google/genai": "^1.52.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/node-cron": "^3.0.11",
