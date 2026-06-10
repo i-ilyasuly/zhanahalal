@@ -25,7 +25,11 @@ export function cleanText(text: string): string {
 
 export function escapeHTML(text: string): string {
   if (!text) return "";
-  return String(text)
+  let s = String(text);
+  // Decode HTML entities that Telegram doesn't support natively
+  s = s.replace(/&#038;/g, "&").replace(/&amp;/gi, "&");
+  
+  return s
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");

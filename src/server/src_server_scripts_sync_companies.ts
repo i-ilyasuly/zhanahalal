@@ -41,6 +41,7 @@ function fetchUrl(url: string): Promise<any> {
 function decodeHTML(text: string): string {
   if (!text) return "";
   return text
+    .replace(/&#038;/g, "&")
     .replace(/&#171;/g, "«")
     .replace(/&#187;/g, "»")
     .replace(/&quot;/g, '"')

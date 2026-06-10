@@ -93,14 +93,14 @@ async function executeTool(name: string, args: any, matchedItems: any[]): Promis
 }
 
 export function closeHTMLTags(html: string): string {
-  const tags = ['b', 'i', 'code', 'pre', 'u'];
+  const tags = ['b', 'i', 'code', 'pre', 'u', 'blockquote', 'a'];
   let closed = html;
   
   // Track open tags in a LIFO stack
   const openTags: string[] = [];
   
   // Regex to find all opening or closing tags of interest
-  const tagRegex = /<\/?(b|i|code|pre|u)\b[^>]*>/g;
+  const tagRegex = /<\/?(b|i|code|pre|u|blockquote|a)\b[^>]*>/g;
   let match;
   while ((match = tagRegex.exec(html)) !== null) {
     const fullTag = match[0];

@@ -97,11 +97,11 @@ export async function sendSearchPage(ctx: MyContext, page: number = 0, isPhoto: 
   let msgText = "";
   if (aiExplanation) {
     msgText += `${aiExplanation}\n\n`;
-  }
-  
-  const searchTypeStr = isPhoto ? '📸 <b>Сурет бойынша</b>' : `🔍 <b>«${subject}» бойынша</b>`;
-  msgText += `${searchTypeStr} табылды.\n\n`;
-  if (!aiExplanation) {
+  } else if (ctx.session.aiIntro) {
+    msgText += `${ctx.session.aiIntro}\n\n`;
+  } else {
+    const searchTypeStr = isPhoto ? '📸 <b>Сурет бойынша</b>' : `🔍 <b>«${subject}» бойынша</b>`;
+    msgText += `${searchTypeStr} табылды.\n\n`;
     msgText += `<i>Бірнеше мекеме немесе филиалдар табылды (әр филиал өзінің жеке сертификатын алады). Өзіңізге қажеттісін таңдаңыз.</i>\n\n`;
   }
 
@@ -135,6 +135,10 @@ export async function sendSearchPage(ctx: MyContext, page: number = 0, isPhoto: 
       style: isActive ? 'success' : 'danger'
     } as any);
   });
+
+  if (ctx.session.aiOutro) {
+    msgText += `${ctx.session.aiOutro}\n`;
+  }
 
   buttons.push(itemButtons);
 

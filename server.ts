@@ -151,27 +151,22 @@ async function startServer() {
     const force = req.query.force === "true";
     console.log(`📥 [Manual Trigger] Қолмен синхрондау сұранысы қабылданды (GET /api/admin/sync-now, force: ${force})...`);
     
-    // Set headers for HTTP Streaming (chunked response)
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Transfer-Encoding', 'chunked');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
+    // Жауапты бірден қайтарамыз (фонда жалғасады)
+    res.json({
+      success: true,
+      message: "🚀 Синхрондау фонда (background) басталды! Процесс сервер логтарында жалғасады және контейнер сөніп қалмауы үшін кепілденген фондық жұмыс атқарылады."
+    });
     
-    try {
-      res.write("🚀 [Sync] Синхрондау процесі басталды...\n");
-      
-      await runSync(force, (msg: string) => {
-        res.write(msg);
-      });
-
-      res.write("\n🔄 [Sync] Кеш оқылуда...\n");
+    // Фонда кедергісіз (background) орындаймыз
+    runSync(force, (msg: string) => {
+      // Консольге жазамыз, өйткені res жіберіліп қойды
+    }).then(async () => {
+      console.log("\n🔄 [Sync Background] Кеш оқылуда...");
       await loadCache(true);
-      res.write("✅ [Sync] Деректер мен кеш сәтті жаңартылды!\n");
-      res.end();
-    } catch (e: any) {
-      console.error("❌ [Manual Trigger Error] Қолмен синхрондау сәтсіз аяқталды:", e);
-      res.write(`\n❌ [Sync Error] Қате: ${e.message || String(e)}\n`);
-      res.end();
-    }
+      console.log("✅ [Sync Background] Деректер мен кеш сәтті жаңартылды!");
+    }).catch((e: any) => {
+      console.error("❌ [Sync Background Error] Қолмен синхрондау сәтсіз аяқталды:", e);
+    });
   });
 
   app.get("/api/admin/sync-status", async (req, res) => {

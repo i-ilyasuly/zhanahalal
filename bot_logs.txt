@@ -66,3 +66,957 @@
 [2026-06-08T23:59:49.220Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
 [2026-06-08T23:59:49.223Z] [DB Search] searchData returned 7 items.
 [2026-06-08T23:59:49.223Z] [DB Search] Vector search bypass confidence filter. Total items used directly: 7
+[2026-06-09T08:19:39.139Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-09T08:19:40.419Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-09T08:19:40.646Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-09T08:19:40.647Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-09T08:19:42.164Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-09T08:20:07.805Z] ⏳ [Sync Batch] Top 1 / 121 (15 / 1807 мекеме)...
+[2026-06-09T08:21:54.049Z] [Sync] Embedded batch of 15 companies. Current total: 15
+[2026-06-09T08:21:55.050Z] ⏳ [Sync Batch] Top 2 / 121 (15 / 1807 мекеме)...
+[2026-06-09T08:23:40.690Z] [Sync] Embedded batch of 15 companies. Current total: 30
+[2026-06-09T08:23:41.690Z] ⏳ [Sync Batch] Top 3 / 121 (15 / 1807 мекеме)...
+[2026-06-09T08:25:21.944Z] [Sync] Embedded batch of 15 companies. Current total: 45
+[2026-06-09T08:25:22.945Z] ⏳ [Sync Batch] Top 4 / 121 (15 / 1807 мекеме)...
+[2026-06-09T08:27:04.008Z] ❌ [Sync Error] Сәйкес мекенді өңдеу сәтсіз аяқталды (ID: 20432): ApiError: {"error":{"code":429,"message":"Quota exceeded for aiplatform.googleapis.com/online_prediction_requests_per_base_model with base model: gemini-embedding-2. Please submit a quota increase request. https://cloud.google.com/vertex-ai/docs/generative-ai/quotas-genai.","status":"RESOURCE_EXHAUSTED"}}
+    at throwErrorIfNotOK (/app/applet/node_modules/@google/genai/src/_api_client.ts:953:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async <anonymous> (/app/applet/node_modules/@google/genai/src/_api_client.ts:561:9)
+    at async Models.Models.embedContent (/app/applet/node_modules/@google/genai/src/models.ts:74:14)
+    at async fetchFn (/app/applet/src/server/src_server_aiClient.ts:273:17)
+    at async retryWithBackoff (/app/applet/src/server/src_server_aiClient.ts:225:12)
+    at async getEmbedding (/app/applet/src/server/src_server_scripts_sync_companies.ts:112:20)
+    at async processItem (/app/applet/src/server/src_server_scripts_sync_companies.ts:311:27)
+    at async <anonymous> (/app/applet/src/server/src_server_scripts_sync_companies.ts:368:11)
+    at async Promise.all (index 12)
+[2026-06-09T08:42:27.099Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: true)
+[2026-06-09T08:42:27.099Z] ⚠️ [Sync] force=true: Wipe existing embeddings from Firestore started...
+[2026-06-09T08:42:29.009Z] 🗑️ [Sync] Clearing embeddings for 1879 companies...
+[2026-06-09T08:42:29.663Z] 🧹 [Sync] Committed bulk wipe batch of 500 documents.
+[2026-06-09T08:42:30.660Z] 🧹 [Sync] Committed bulk wipe batch of 1000 documents.
+[2026-06-09T08:42:31.435Z] 🧹 [Sync] Committed bulk wipe batch of 1500 documents.
+[2026-06-09T08:42:32.523Z] 🧹 [Sync] Committed final bulk wipe batch of 1879 documents.
+[2026-06-09T08:42:32.523Z] ✅ [Sync] All existing embeddings wiped successfully from Firestore!
+[2026-06-09T08:42:43.616Z] ⏳ [Sync Batch] Top 1 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:44:36.072Z] [Sync] Embedded batch of 15 companies. Current total: 15
+[2026-06-09T08:44:37.074Z] ⏳ [Sync Batch] Top 2 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:46:20.958Z] [Sync] Embedded batch of 15 companies. Current total: 30
+[2026-06-09T08:46:21.958Z] ⏳ [Sync Batch] Top 3 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:47:06.954Z] [Sync] Embedded batch of 15 companies. Current total: 45
+[2026-06-09T08:47:07.954Z] ⏳ [Sync Batch] Top 4 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:48:47.719Z] [Sync] Embedded batch of 15 companies. Current total: 60
+[2026-06-09T08:48:48.720Z] ⏳ [Sync Batch] Top 5 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:50:32.374Z] [Sync] Embedded batch of 15 companies. Current total: 75
+[2026-06-09T08:50:33.376Z] ⏳ [Sync Batch] Top 6 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:52:19.422Z] [Sync] Embedded batch of 15 companies. Current total: 90
+[2026-06-09T08:52:20.422Z] ⏳ [Sync Batch] Top 7 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:54:04.161Z] [Sync] Embedded batch of 15 companies. Current total: 105
+[2026-06-09T08:54:05.162Z] ⏳ [Sync Batch] Top 8 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:55:00.338Z] [Sync] Embedded batch of 15 companies. Current total: 120
+[2026-06-09T08:55:01.339Z] ⏳ [Sync Batch] Top 9 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:55:53.351Z] [Sync] Embedded batch of 15 companies. Current total: 135
+[2026-06-09T08:55:54.352Z] ⏳ [Sync Batch] Top 10 / 126 (15 / 1879 мекеме)...
+[2026-06-09T08:57:31.353Z] ❌ [Sync Error] Сәйкес мекенді өңдеу сәтсіз аяқталды (ID: 20375): ApiError: {"error":{"code":429,"message":"Quota exceeded for aiplatform.googleapis.com/online_prediction_requests_per_base_model with base model: gemini-embedding-2. Please submit a quota increase request. https://cloud.google.com/vertex-ai/docs/generative-ai/quotas-genai.","status":"RESOURCE_EXHAUSTED"}}
+    at throwErrorIfNotOK (/app/applet/node_modules/@google/genai/src/_api_client.ts:953:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async <anonymous> (/app/applet/node_modules/@google/genai/src/_api_client.ts:561:9)
+    at async Models.Models.embedContent (/app/applet/node_modules/@google/genai/src/models.ts:74:14)
+    at async fetchFn (/app/applet/src/server/src_server_aiClient.ts:273:17)
+    at async retryWithBackoff (/app/applet/src/server/src_server_aiClient.ts:225:12)
+    at async getEmbedding (/app/applet/src/server/src_server_scripts_sync_companies.ts:112:20)
+    at async processItem (/app/applet/src/server/src_server_scripts_sync_companies.ts:311:27)
+    at async <anonymous> (/app/applet/src/server/src_server_scripts_sync_companies.ts:368:11)
+    at async Promise.all (index 2)
+[2026-06-09T09:01:48.265Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-09T09:01:49.368Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-09T09:01:49.594Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-09T09:01:49.595Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-09T09:01:51.556Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-09T09:01:58.983Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-09T09:02:00.083Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-09T09:02:00.311Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-09T09:02:00.312Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-09T09:02:02.160Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-09T09:02:13.743Z] ⏳ [Sync Batch] Top 1 / 116 (15 / 1730 мекеме)...
+[2026-06-09T09:03:28.293Z] [Sync] Embedded batch of 15 companies. Current total: 15
+[2026-06-09T09:03:29.293Z] ⏳ [Sync Batch] Top 2 / 116 (15 / 1730 мекеме)...
+[2026-06-09T09:04:44.356Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-09T09:04:45.438Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-09T09:04:45.667Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-09T09:04:45.668Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-09T09:04:46.528Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-09T09:04:52.869Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-09T09:04:53.991Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-09T09:04:54.238Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-09T09:04:54.238Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-09T09:04:56.047Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-09T09:05:06.516Z] ⏳ [Sync Batch] Top 1 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:06:04.775Z] [Sync] Embedded batch of 15 companies. Current total: 15
+[2026-06-09T09:06:05.776Z] ⏳ [Sync Batch] Top 2 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:08:31.537Z] [Sync] Embedded batch of 15 companies. Current total: 30
+[2026-06-09T09:08:32.539Z] ⏳ [Sync Batch] Top 3 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:10:13.961Z] [Sync] Embedded batch of 15 companies. Current total: 45
+[2026-06-09T09:10:14.962Z] ⏳ [Sync Batch] Top 4 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:11:14.821Z] [Sync] Embedded batch of 15 companies. Current total: 60
+[2026-06-09T09:11:15.823Z] ⏳ [Sync Batch] Top 5 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:13:34.129Z] [Sync] Embedded batch of 15 companies. Current total: 75
+[2026-06-09T09:13:35.130Z] ⏳ [Sync Batch] Top 6 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:15:04.920Z] [Sync] Embedded batch of 15 companies. Current total: 90
+[2026-06-09T09:15:05.922Z] ⏳ [Sync Batch] Top 7 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:16:03.320Z] [Sync] Embedded batch of 15 companies. Current total: 105
+[2026-06-09T09:16:04.321Z] ⏳ [Sync Batch] Top 8 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:16:59.906Z] [Sync] Embedded batch of 15 companies. Current total: 120
+[2026-06-09T09:17:00.907Z] ⏳ [Sync Batch] Top 9 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:17:57.084Z] [Sync] Embedded batch of 15 companies. Current total: 135
+[2026-06-09T09:17:58.085Z] ⏳ [Sync Batch] Top 10 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:20:13.800Z] [Sync] Embedded batch of 15 companies. Current total: 150
+[2026-06-09T09:20:14.802Z] ⏳ [Sync Batch] Top 11 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:22:22.872Z] [Sync] Embedded batch of 15 companies. Current total: 165
+[2026-06-09T09:22:23.873Z] ⏳ [Sync Batch] Top 12 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:23:51.495Z] [Sync] Embedded batch of 15 companies. Current total: 180
+[2026-06-09T09:23:52.497Z] ⏳ [Sync Batch] Top 13 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:25:19.481Z] [Sync] Embedded batch of 15 companies. Current total: 195
+[2026-06-09T09:25:20.483Z] ⏳ [Sync Batch] Top 14 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:27:38.632Z] [Sync] Embedded batch of 15 companies. Current total: 210
+[2026-06-09T09:27:39.632Z] ⏳ [Sync Batch] Top 15 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:29:02.342Z] [Sync] Embedded batch of 15 companies. Current total: 225
+[2026-06-09T09:29:03.342Z] ⏳ [Sync Batch] Top 16 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:30:03.806Z] [Sync] Embedded batch of 15 companies. Current total: 240
+[2026-06-09T09:30:04.808Z] ⏳ [Sync Batch] Top 17 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:32:15.880Z] [Sync] Embedded batch of 15 companies. Current total: 255
+[2026-06-09T09:32:16.880Z] ⏳ [Sync Batch] Top 18 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:34:17.964Z] [Sync] Embedded batch of 15 companies. Current total: 270
+[2026-06-09T09:34:18.964Z] ⏳ [Sync Batch] Top 19 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:36:02.853Z] [Sync] Embedded batch of 15 companies. Current total: 285
+[2026-06-09T09:36:03.854Z] ⏳ [Sync Batch] Top 20 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:38:28.814Z] [Sync] Embedded batch of 15 companies. Current total: 300
+[2026-06-09T09:38:29.815Z] ⏳ [Sync Batch] Top 21 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:39:24.233Z] [Sync] Embedded batch of 15 companies. Current total: 315
+[2026-06-09T09:39:25.234Z] ⏳ [Sync Batch] Top 22 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:42:10.300Z] [Sync] Embedded batch of 15 companies. Current total: 330
+[2026-06-09T09:42:11.301Z] ⏳ [Sync Batch] Top 23 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:44:30.388Z] [Sync] Embedded batch of 15 companies. Current total: 345
+[2026-06-09T09:44:31.389Z] ⏳ [Sync Batch] Top 24 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:46:06.406Z] [Sync] Embedded batch of 15 companies. Current total: 360
+[2026-06-09T09:46:07.407Z] ⏳ [Sync Batch] Top 25 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:48:38.820Z] [Sync] Embedded batch of 15 companies. Current total: 375
+[2026-06-09T09:48:39.821Z] ⏳ [Sync Batch] Top 26 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:50:02.350Z] [Sync] Embedded batch of 15 companies. Current total: 390
+[2026-06-09T09:50:03.351Z] ⏳ [Sync Batch] Top 27 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:51:09.968Z] [Sync] Embedded batch of 15 companies. Current total: 405
+[2026-06-09T09:51:10.968Z] ⏳ [Sync Batch] Top 28 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:53:28.872Z] [Sync] Embedded batch of 15 companies. Current total: 420
+[2026-06-09T09:53:29.872Z] ⏳ [Sync Batch] Top 29 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:54:57.809Z] [Sync] Embedded batch of 15 companies. Current total: 435
+[2026-06-09T09:54:58.810Z] ⏳ [Sync Batch] Top 30 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:55:59.392Z] [Sync] Embedded batch of 15 companies. Current total: 450
+[2026-06-09T09:56:00.394Z] ⏳ [Sync Batch] Top 31 / 114 (15 / 1707 мекеме)...
+[2026-06-09T09:58:30.368Z] [Sync] Embedded batch of 15 companies. Current total: 465
+[2026-06-09T09:58:31.369Z] ⏳ [Sync Batch] Top 32 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:00:10.666Z] [Sync] Embedded batch of 15 companies. Current total: 480
+[2026-06-09T10:00:11.667Z] ⏳ [Sync Batch] Top 33 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:01:53.202Z] [Sync] Embedded batch of 15 companies. Current total: 495
+[2026-06-09T10:01:54.203Z] ⏳ [Sync Batch] Top 34 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:03:03.621Z] [Sync] Embedded batch of 15 companies. Current total: 510
+[2026-06-09T10:03:04.623Z] ⏳ [Sync Batch] Top 35 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:05:32.063Z] [Sync] Embedded batch of 15 companies. Current total: 525
+[2026-06-09T10:05:33.063Z] ⏳ [Sync Batch] Top 36 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:06:56.613Z] [Sync] Embedded batch of 15 companies. Current total: 540
+[2026-06-09T10:06:57.614Z] ⏳ [Sync Batch] Top 37 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:08:18.069Z] [Sync] Embedded batch of 15 companies. Current total: 555
+[2026-06-09T10:08:19.069Z] ⏳ [Sync Batch] Top 38 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:10:49.499Z] [Sync] Embedded batch of 15 companies. Current total: 570
+[2026-06-09T10:10:50.500Z] ⏳ [Sync Batch] Top 39 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:12:33.898Z] [Sync] Embedded batch of 15 companies. Current total: 585
+[2026-06-09T10:12:34.898Z] ⏳ [Sync Batch] Top 40 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:14:17.175Z] [Sync] Embedded batch of 15 companies. Current total: 600
+[2026-06-09T10:14:18.177Z] ⏳ [Sync Batch] Top 41 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:15:52.726Z] [Sync] Embedded batch of 15 companies. Current total: 615
+[2026-06-09T10:15:53.728Z] ⏳ [Sync Batch] Top 42 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:18:21.132Z] [Sync] Embedded batch of 15 companies. Current total: 630
+[2026-06-09T10:18:22.134Z] ⏳ [Sync Batch] Top 43 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:19:15.387Z] [Sync] Embedded batch of 15 companies. Current total: 645
+[2026-06-09T10:19:16.388Z] ⏳ [Sync Batch] Top 44 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:21:25.523Z] [Sync] Embedded batch of 15 companies. Current total: 660
+[2026-06-09T10:21:26.524Z] ⏳ [Sync Batch] Top 45 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:22:53.712Z] [Sync] Embedded batch of 15 companies. Current total: 675
+[2026-06-09T10:22:54.713Z] ⏳ [Sync Batch] Top 46 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:25:13.196Z] [Sync] Embedded batch of 15 companies. Current total: 690
+[2026-06-09T10:25:14.197Z] ⏳ [Sync Batch] Top 47 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:27:34.346Z] [Sync] Embedded batch of 15 companies. Current total: 705
+[2026-06-09T10:27:35.347Z] ⏳ [Sync Batch] Top 48 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:29:09.191Z] [Sync] Embedded batch of 15 companies. Current total: 720
+[2026-06-09T10:29:10.192Z] ⏳ [Sync Batch] Top 49 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:30:02.135Z] [Sync] Embedded batch of 15 companies. Current total: 735
+[2026-06-09T10:30:03.137Z] ⏳ [Sync Batch] Top 50 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:32:34.532Z] [Sync] Embedded batch of 15 companies. Current total: 750
+[2026-06-09T10:32:35.534Z] ⏳ [Sync Batch] Top 51 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:34:04.927Z] [Sync] Embedded batch of 15 companies. Current total: 765
+[2026-06-09T10:34:05.928Z] ⏳ [Sync Batch] Top 52 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:35:50.778Z] [Sync] Embedded batch of 15 companies. Current total: 780
+[2026-06-09T10:35:51.780Z] ⏳ [Sync Batch] Top 53 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:37:16.219Z] [Sync] Embedded batch of 15 companies. Current total: 795
+[2026-06-09T10:37:17.220Z] ⏳ [Sync Batch] Top 54 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:39:02.990Z] [Sync] Embedded batch of 15 companies. Current total: 810
+[2026-06-09T10:39:03.991Z] ⏳ [Sync Batch] Top 55 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:41:34.244Z] [Sync] Embedded batch of 15 companies. Current total: 825
+[2026-06-09T10:41:35.245Z] ⏳ [Sync Batch] Top 56 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:42:12.449Z] [Sync] Embedded batch of 15 companies. Current total: 840
+[2026-06-09T10:42:13.449Z] ⏳ [Sync Batch] Top 57 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:44:31.406Z] [Sync] Embedded batch of 15 companies. Current total: 855
+[2026-06-09T10:44:32.407Z] ⏳ [Sync Batch] Top 58 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:46:44.710Z] [Sync] Embedded batch of 15 companies. Current total: 870
+[2026-06-09T10:46:45.712Z] ⏳ [Sync Batch] Top 59 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:48:14.728Z] [Sync] Embedded batch of 15 companies. Current total: 885
+[2026-06-09T10:48:15.729Z] ⏳ [Sync Batch] Top 60 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:50:12.448Z] [Sync] Embedded batch of 15 companies. Current total: 900
+[2026-06-09T10:50:13.448Z] ⏳ [Sync Batch] Top 61 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:52:36.952Z] [Sync] Embedded batch of 15 companies. Current total: 915
+[2026-06-09T10:52:37.953Z] ⏳ [Sync Batch] Top 62 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:54:11.978Z] [Sync] Embedded batch of 15 companies. Current total: 930
+[2026-06-09T10:54:12.979Z] ⏳ [Sync Batch] Top 63 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:55:03.573Z] [Sync] Embedded batch of 15 companies. Current total: 945
+[2026-06-09T10:55:04.573Z] ⏳ [Sync Batch] Top 64 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:56:38.193Z] [Sync] Embedded batch of 15 companies. Current total: 960
+[2026-06-09T10:56:39.194Z] ⏳ [Sync Batch] Top 65 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:58:07.913Z] [Sync] Embedded batch of 15 companies. Current total: 975
+[2026-06-09T10:58:08.914Z] ⏳ [Sync Batch] Top 66 / 114 (15 / 1707 мекеме)...
+[2026-06-09T10:59:05.263Z] [Sync] Embedded batch of 15 companies. Current total: 990
+[2026-06-09T10:59:06.263Z] ⏳ [Sync Batch] Top 67 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:01:29.101Z] [Sync] Embedded batch of 15 companies. Current total: 1005
+[2026-06-09T11:01:30.102Z] ⏳ [Sync Batch] Top 68 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:03:21.281Z] [Sync] Embedded batch of 15 companies. Current total: 1020
+[2026-06-09T11:03:22.282Z] ⏳ [Sync Batch] Top 69 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:04:23.207Z] [Sync] Embedded batch of 15 companies. Current total: 1035
+[2026-06-09T11:04:24.209Z] ⏳ [Sync Batch] Top 70 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:06:06.502Z] [Sync] Embedded batch of 15 companies. Current total: 1050
+[2026-06-09T11:06:07.502Z] ⏳ [Sync Batch] Top 71 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:08:30.624Z] [Sync] Embedded batch of 15 companies. Current total: 1065
+[2026-06-09T11:08:31.624Z] ⏳ [Sync Batch] Top 72 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:10:13.794Z] [Sync] Embedded batch of 15 companies. Current total: 1080
+[2026-06-09T11:10:14.794Z] ⏳ [Sync Batch] Top 73 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:11:40.734Z] [Sync] Embedded batch of 15 companies. Current total: 1095
+[2026-06-09T11:11:41.734Z] ⏳ [Sync Batch] Top 74 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:13:08.668Z] [Sync] Embedded batch of 15 companies. Current total: 1110
+[2026-06-09T11:13:09.670Z] ⏳ [Sync Batch] Top 75 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:15:36.473Z] [Sync] Embedded batch of 15 companies. Current total: 1125
+[2026-06-09T11:15:37.474Z] ⏳ [Sync Batch] Top 76 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:16:00.989Z] [Sync] Embedded batch of 15 companies. Current total: 1140
+[2026-06-09T11:16:01.992Z] ⏳ [Sync Batch] Top 77 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:18:20.983Z] [Sync] Embedded batch of 15 companies. Current total: 1155
+[2026-06-09T11:18:21.983Z] ⏳ [Sync Batch] Top 78 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:20:03.977Z] [Sync] Embedded batch of 15 companies. Current total: 1170
+[2026-06-09T11:20:04.979Z] ⏳ [Sync Batch] Top 79 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:22:23.625Z] [Sync] Embedded batch of 15 companies. Current total: 1185
+[2026-06-09T11:22:24.626Z] ⏳ [Sync Batch] Top 80 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:23:16.772Z] [Sync] Embedded batch of 15 companies. Current total: 1200
+[2026-06-09T11:23:17.774Z] ⏳ [Sync Batch] Top 81 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:25:32.205Z] [Sync] Embedded batch of 15 companies. Current total: 1215
+[2026-06-09T11:25:33.206Z] ⏳ [Sync Batch] Top 82 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:27:10.706Z] [Sync] Embedded batch of 15 companies. Current total: 1230
+[2026-06-09T11:27:11.708Z] ⏳ [Sync Batch] Top 83 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:28:12.748Z] [Sync] Embedded batch of 15 companies. Current total: 1245
+[2026-06-09T11:28:13.748Z] ⏳ [Sync Batch] Top 84 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:30:27.575Z] [Sync] Embedded batch of 15 companies. Current total: 1260
+[2026-06-09T11:30:28.576Z] ⏳ [Sync Batch] Top 85 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:32:03.550Z] [Sync] Embedded batch of 15 companies. Current total: 1275
+[2026-06-09T11:32:04.552Z] ⏳ [Sync Batch] Top 86 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:33:04.067Z] [Sync] Embedded batch of 15 companies. Current total: 1290
+[2026-06-09T11:33:05.067Z] ⏳ [Sync Batch] Top 87 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:34:37.652Z] [Sync] Embedded batch of 15 companies. Current total: 1305
+[2026-06-09T11:34:38.653Z] ⏳ [Sync Batch] Top 88 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:36:18.974Z] [Sync] Embedded batch of 15 companies. Current total: 1320
+[2026-06-09T11:36:19.975Z] ⏳ [Sync Batch] Top 89 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:38:27.000Z] [Sync] Embedded batch of 15 companies. Current total: 1335
+[2026-06-09T11:38:28.002Z] ⏳ [Sync Batch] Top 90 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:40:04.230Z] [Sync] Embedded batch of 15 companies. Current total: 1350
+[2026-06-09T11:40:05.232Z] ⏳ [Sync Batch] Top 91 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:42:33.072Z] [Sync] Embedded batch of 15 companies. Current total: 1365
+[2026-06-09T11:42:34.073Z] ⏳ [Sync Batch] Top 92 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:44:55.309Z] [Sync] Embedded batch of 15 companies. Current total: 1380
+[2026-06-09T11:44:56.310Z] ⏳ [Sync Batch] Top 93 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:47:11.665Z] [Sync] Embedded batch of 15 companies. Current total: 1395
+[2026-06-09T11:47:12.666Z] ⏳ [Sync Batch] Top 94 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:49:28.424Z] [Sync] Embedded batch of 15 companies. Current total: 1410
+[2026-06-09T11:49:29.425Z] ⏳ [Sync Batch] Top 95 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:51:04.457Z] [Sync] Embedded batch of 15 companies. Current total: 1425
+[2026-06-09T11:51:05.458Z] ⏳ [Sync Batch] Top 96 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:53:39.970Z] [Sync] Embedded batch of 15 companies. Current total: 1440
+[2026-06-09T11:53:40.971Z] ⏳ [Sync Batch] Top 97 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:55:10.716Z] [Sync] Embedded batch of 15 companies. Current total: 1455
+[2026-06-09T11:55:11.716Z] ⏳ [Sync Batch] Top 98 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:57:24.374Z] [Sync] Embedded batch of 15 companies. Current total: 1470
+[2026-06-09T11:57:25.375Z] ⏳ [Sync Batch] Top 99 / 114 (15 / 1707 мекеме)...
+[2026-06-09T11:58:50.459Z] [Sync] Embedded batch of 15 companies. Current total: 1485
+[2026-06-09T11:58:51.460Z] ⏳ [Sync Batch] Top 100 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:02:18.350Z] [Sync] Embedded batch of 15 companies. Current total: 1500
+[2026-06-09T12:02:19.351Z] ⏳ [Sync Batch] Top 101 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:03:16.223Z] [Sync] Embedded batch of 15 companies. Current total: 1515
+[2026-06-09T12:03:17.225Z] ⏳ [Sync Batch] Top 102 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:06:48.670Z] [Sync] Embedded batch of 15 companies. Current total: 1530
+[2026-06-09T12:06:49.670Z] ⏳ [Sync Batch] Top 103 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:09:13.847Z] [Sync] Embedded batch of 15 companies. Current total: 1545
+[2026-06-09T12:09:14.848Z] ⏳ [Sync Batch] Top 104 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:10:36.117Z] [Sync] Embedded batch of 15 companies. Current total: 1560
+[2026-06-09T12:10:37.117Z] ⏳ [Sync Batch] Top 105 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:12:47.601Z] [Sync] Embedded batch of 15 companies. Current total: 1575
+[2026-06-09T12:12:48.602Z] ⏳ [Sync Batch] Top 106 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:14:22.916Z] [Sync] Embedded batch of 15 companies. Current total: 1590
+[2026-06-09T12:14:23.916Z] ⏳ [Sync Batch] Top 107 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:16:01.912Z] [Sync] Embedded batch of 15 companies. Current total: 1605
+[2026-06-09T12:16:02.913Z] ⏳ [Sync Batch] Top 108 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:18:18.040Z] [Sync] Embedded batch of 15 companies. Current total: 1620
+[2026-06-09T12:18:19.041Z] ⏳ [Sync Batch] Top 109 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:19:48.398Z] [Sync] Embedded batch of 15 companies. Current total: 1635
+[2026-06-09T12:19:49.400Z] ⏳ [Sync Batch] Top 110 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:21:16.240Z] [Sync] Embedded batch of 15 companies. Current total: 1650
+[2026-06-09T12:21:17.240Z] ⏳ [Sync Batch] Top 111 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:22:53.122Z] [Sync] Embedded batch of 15 companies. Current total: 1665
+[2026-06-09T12:22:54.123Z] ⏳ [Sync Batch] Top 112 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:23:55.505Z] [Sync] Embedded batch of 15 companies. Current total: 1680
+[2026-06-09T12:23:56.505Z] ⏳ [Sync Batch] Top 113 / 114 (15 / 1707 мекеме)...
+[2026-06-09T12:26:20.288Z] [Sync] Embedded batch of 15 companies. Current total: 1695
+[2026-06-09T12:26:21.289Z] ⏳ [Sync Batch] Top 114 / 114 (12 / 1707 мекеме)...
+[2026-06-09T12:27:18.203Z] [Sync] Embedded batch of 15 companies. Current total: 1707
+[2026-06-09T12:31:08.275Z] 📩 Incoming message from Damuhalal: "Кез келген халал орнын айт"
+[2026-06-09T12:31:08.533Z] [Intent Routing] Running classification for query: "Кез келген халал орнын айт"
+[2026-06-09T12:31:10.822Z] [Intent Routing] Decision: action="search", query="халал орын", reply=""
+[2026-06-09T12:31:10.823Z] [DB Search] Calling searchData with search query: "халал орын"
+[2026-06-09T12:31:10.823Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-09T12:31:10.823Z] [searchData] Raw Query: "халал орын"
+[2026-06-09T12:31:10.824Z] [searchData] Processed Query: "орын"
+[2026-06-09T12:31:10.824Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-09T12:31:10.824Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "орын"...
+[2026-06-09T12:31:15.954Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-09T12:31:15.955Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-09T12:31:17.494Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-09T12:31:17.737Z] [DB Search] searchData returned 7 items.
+[2026-06-09T12:31:17.737Z] [DB Search] Vector search bypass confidence filter. Total items used directly: 7
+[2026-06-09T12:31:32.519Z] 📩 Incoming message from Damuhalal: "Раян"
+[2026-06-09T12:31:32.759Z] [Intent Routing] Running classification for query: "Раян"
+[2026-06-09T12:31:36.685Z] [Intent Routing] Decision: action="search", query="Раян", reply=""
+[2026-06-09T12:31:36.685Z] [DB Search] Calling searchData with search query: "Раян"
+[2026-06-09T12:31:36.685Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-09T12:31:36.685Z] [searchData] Raw Query: "Раян"
+[2026-06-09T12:31:36.685Z] [searchData] Processed Query: "раян"
+[2026-06-09T12:31:36.685Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "раян"...
+[2026-06-09T12:31:37.171Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-09T12:31:37.172Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-09T12:31:38.497Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-09T12:31:38.676Z] [DB Search] searchData returned 7 items.
+[2026-06-09T12:31:38.676Z] [DB Search] Vector search bypass confidence filter. Total items used directly: 7
+[2026-06-09T12:34:20.544Z] 📩 Incoming message from Damuhalal: "Ет дүкенін айт"
+[2026-06-09T12:34:20.782Z] [Intent Routing] Running classification for query: "Ет дүкенін айт"
+[2026-06-09T12:34:25.130Z] [Intent Routing] Decision: action="search", query="Ет дүкені", reply=""
+[2026-06-09T12:34:25.130Z] [DB Search] Calling searchData with search query: "Ет дүкені"
+[2026-06-09T12:34:25.130Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-09T12:34:25.130Z] [searchData] Raw Query: "Ет дүкені"
+[2026-06-09T12:34:25.130Z] [searchData] Processed Query: "ет дүкені"
+[2026-06-09T12:34:25.130Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "ет дүкені"...
+[2026-06-09T12:34:25.505Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-09T12:34:25.505Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-09T12:34:26.439Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-09T12:34:26.618Z] [DB Search] searchData returned 7 items.
+[2026-06-09T12:34:26.618Z] [DB Search] Vector search bypass confidence filter. Total items used directly: 7
+[2026-06-09T12:35:20.525Z] 📩 Incoming message from Damuhalal: "Стейк орындарын айт"
+[2026-06-09T12:35:20.765Z] [Intent Routing] Running classification for query: "Стейк орындарын айт"
+[2026-06-09T12:35:23.305Z] [Intent Routing] Decision: action="search", query="Стейк орындары", reply=""
+[2026-06-09T12:35:23.305Z] [DB Search] Calling searchData with search query: "Стейк орындары"
+[2026-06-09T12:35:23.305Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-09T12:35:23.305Z] [searchData] Raw Query: "Стейк орындары"
+[2026-06-09T12:35:23.305Z] [searchData] Processed Query: "стейк орындары"
+[2026-06-09T12:35:23.305Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-09T12:35:23.305Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "стейк орындары"...
+[2026-06-09T12:35:23.783Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-09T12:35:23.784Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-09T12:35:24.728Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-09T12:35:25.050Z] [DB Search] searchData returned 7 items.
+[2026-06-09T12:35:25.051Z] [DB Search] Vector search bypass confidence filter. Total items used directly: 7
+[2026-06-09T12:36:34.581Z] 📩 Incoming message from Damuhalal: "Донер бар ма сататтын жерде"
+[2026-06-09T12:36:34.820Z] [Intent Routing] Running classification for query: "Донер бар ма сататтын жерде"
+[2026-06-09T12:36:37.259Z] [Intent Routing] Decision: action="search", query="Донер", reply=""
+[2026-06-09T12:36:37.259Z] [DB Search] Calling searchData with search query: "Донер"
+[2026-06-09T12:36:37.259Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-09T12:36:37.259Z] [searchData] Raw Query: "Донер"
+[2026-06-09T12:36:37.259Z] [searchData] Processed Query: "донер"
+[2026-06-09T12:36:37.259Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-09T12:36:37.259Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "донер"...
+[2026-06-09T12:36:37.646Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-09T12:36:37.646Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-09T12:36:38.761Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-09T12:36:38.970Z] [DB Search] searchData returned 7 items.
+[2026-06-09T12:36:38.970Z] [DB Search] Vector search bypass confidence filter. Total items used directly: 7
+[2026-06-09T12:40:44.085Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-09T12:40:45.426Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-09T12:40:45.658Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-09T12:40:45.658Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-09T12:40:49.198Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-09T12:40:58.001Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-09T12:40:59.364Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-09T12:40:59.592Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-09T12:40:59.592Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-09T12:41:03.984Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-09T12:51:28.129Z] [Startup] BOT RUNTIME EXCEPTION: 409: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+[2026-06-09T12:53:37.996Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-09T12:53:37.997Z] [searchData] Raw Query: "Сеул"
+[2026-06-09T12:53:37.997Z] [searchData] Processed Query: "сеул"
+[2026-06-09T12:53:37.997Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "сеул"...
+[2026-06-09T12:53:39.622Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-09T12:53:39.623Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-09T12:53:40.863Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-09T12:53:41.082Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-09T12:53:41.083Z] [searchData] Raw Query: "кофе"
+[2026-06-09T12:53:41.083Z] [searchData] Processed Query: "кофе"
+[2026-06-09T12:53:41.083Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-09T12:53:41.083Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "кофе"...
+[2026-06-09T12:53:41.491Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-09T12:53:41.491Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-09T12:53:42.410Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-09T12:53:42.557Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-09T12:53:42.557Z] [searchData] Raw Query: "Стейк жегім келіп тұр"
+[2026-06-09T12:53:42.558Z] [searchData] Processed Query: "стейк жегім келіп тұр"
+[2026-06-09T12:53:42.558Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-09T12:53:42.558Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "стейк жегім келіп тұр"...
+[2026-06-09T12:53:42.961Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-09T12:53:42.961Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-09T12:53:43.971Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-09T12:53:44.397Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-09T12:53:44.397Z] [searchData] Raw Query: "тәтті десерттер"
+[2026-06-09T12:53:44.397Z] [searchData] Processed Query: "тәтті десерттер"
+[2026-06-09T12:53:44.397Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "тәтті десерттер"...
+[2026-06-09T12:53:45.203Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-09T12:53:45.204Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-09T12:53:46.289Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:03:09.593Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T00:03:10.850Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T00:03:11.088Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T00:03:11.088Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T00:03:15.416Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T00:03:31.044Z] 📩 Incoming message from Damuhalal: "Ассалаумағалейкум"
+[2026-06-10T00:03:31.279Z] [Intent Routing] Running classification for query: "Ассалаумағалейкум"
+[2026-06-10T00:03:35.496Z] [Intent Routing] Decision: action="chat", query="", reply="Уағалейкум әссәләм! 👋 Қалыңыз қалай, құрметті пайдаланушы? Сізге қалай көмектесе аламын? 😊"
+[2026-06-10T00:03:35.496Z] [Chat Flow] Processing chat reply. length: 92
+[2026-06-10T00:03:55.042Z] 📩 Incoming message from Damuhalal: "Хани деген халал ма?"
+[2026-06-10T00:03:55.279Z] [Intent Routing] Running classification for query: "Хани деген халал ма?"
+[2026-06-10T00:03:57.544Z] [Intent Routing] Decision: action="search", query="Хани", reply=""
+[2026-06-10T00:03:57.545Z] [DB Search] Calling searchData with search query: "Хани"
+[2026-06-10T00:03:57.546Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:03:57.546Z] [searchData] Raw Query: "Хани"
+[2026-06-10T00:03:57.546Z] [searchData] Processed Query: "хани"
+[2026-06-10T00:03:57.547Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "хани"...
+[2026-06-10T00:04:10.997Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T00:04:10.998Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T00:04:12.322Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:04:12.517Z] [DB Search] searchData returned 7 items.
+[2026-06-10T00:04:12.517Z] [Conversational RAG] Running Agentic RAG filter for query: "Хани деген халал ма?"
+[2026-06-10T00:04:23.513Z] [Conversational RAG] Filtered list: [16881,17519,17521,17910,17912,17914]
+[2026-06-10T00:05:20.676Z] 📩 Incoming message from Damuhalal: "Маған Қарағанды қаласындағысы керек еді"
+[2026-06-10T00:05:20.909Z] [Intent Routing] Running classification for query: "Маған Қарағанды қаласындағысы керек еді"
+[2026-06-10T00:05:23.563Z] [Intent Routing] Decision: action="search", query="Қарағанды", reply=""
+[2026-06-10T00:05:23.563Z] [DB Search] Calling searchData with search query: "Қарағанды"
+[2026-06-10T00:05:23.563Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:05:23.563Z] [searchData] Raw Query: "Қарағанды"
+[2026-06-10T00:05:23.563Z] [searchData] Processed Query: "қарағанды"
+[2026-06-10T00:05:23.563Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-10T00:05:23.563Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "қарағанды"...
+[2026-06-10T00:05:23.958Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T00:05:23.958Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T00:05:25.466Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:05:25.695Z] [DB Search] searchData returned 7 items.
+[2026-06-10T00:05:25.695Z] [Conversational RAG] Running Agentic RAG filter for query: "Маған Қарағанды қаласындағысы керек еді"
+[2026-06-10T00:05:32.053Z] [Conversational RAG] Filtered list: [18633]
+[2026-06-10T00:08:38.927Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:08:38.928Z] [searchData] Raw Query: "Madi Burger"
+[2026-06-10T00:08:38.928Z] [searchData] Processed Query: "madi burger"
+[2026-06-10T00:08:38.929Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "madi burger"...
+[2026-06-10T00:08:40.492Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T00:08:40.492Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T00:08:41.686Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:08:41.703Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:08:41.703Z] [searchData] Raw Query: "Inactive Cafe"
+[2026-06-10T00:08:41.703Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-10T00:08:41.703Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "inactive cafe"...
+[2026-06-10T00:08:42.110Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T00:08:42.111Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T00:08:42.987Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:08:42.992Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:08:42.992Z] [searchData] Raw Query: "mad burge"
+[2026-06-10T00:08:42.992Z] [searchData] Processed Query: "mad burge"
+[2026-06-10T00:08:42.993Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "mad burge"...
+[2026-06-10T00:08:43.400Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T00:08:43.400Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T00:08:44.202Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:08:44.206Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:08:44.206Z] [searchData] Raw Query: "E120"
+[2026-06-10T00:08:44.206Z] [searchData] Processed Query: "e120"
+[2026-06-10T00:08:44.206Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-10T00:08:44.206Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "e120"...
+[2026-06-10T00:08:44.527Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T00:08:44.527Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T00:08:45.385Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:08:45.390Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:08:45.390Z] [searchData] Raw Query: "Кармин"
+[2026-06-10T00:08:45.390Z] [searchData] Processed Query: "кармин"
+[2026-06-10T00:08:45.390Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "кармин"...
+[2026-06-10T00:08:48.359Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T00:08:48.359Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T00:08:49.158Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:09:15.289Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T00:09:16.420Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T00:09:16.669Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T00:09:16.670Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T00:09:20.879Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T00:13:18.362Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:18.363Z] [searchData] Raw Query: "Madi Burger"
+[2026-06-10T00:13:18.364Z] [searchData] Processed Query: "madi burger"
+[2026-06-10T00:13:18.364Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:13:18.373Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:18.373Z] [searchData] Raw Query: "Inactive Cafe"
+[2026-06-10T00:13:18.373Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-10T00:13:18.373Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:13:18.376Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:18.376Z] [searchData] Raw Query: "mad burge"
+[2026-06-10T00:13:18.376Z] [searchData] Processed Query: "mad burge"
+[2026-06-10T00:13:18.376Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:13:18.379Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:18.379Z] [searchData] Raw Query: "E120"
+[2026-06-10T00:13:18.379Z] [searchData] Processed Query: "e120"
+[2026-06-10T00:13:18.379Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-10T00:13:18.379Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:13:18.391Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:18.391Z] [searchData] Raw Query: "Кармин"
+[2026-06-10T00:13:18.391Z] [searchData] Processed Query: "кармин"
+[2026-06-10T00:13:18.391Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:13:51.448Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:51.449Z] [searchData] Raw Query: "Madi Burger"
+[2026-06-10T00:13:51.449Z] [searchData] Processed Query: "madi burger"
+[2026-06-10T00:13:51.450Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:13:51.456Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:51.456Z] [searchData] Raw Query: "Inactive Cafe"
+[2026-06-10T00:13:51.457Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-10T00:13:51.457Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:13:51.459Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:51.459Z] [searchData] Raw Query: "mad burge"
+[2026-06-10T00:13:51.459Z] [searchData] Processed Query: "mad burge"
+[2026-06-10T00:13:51.459Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:13:51.461Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:51.461Z] [searchData] Raw Query: "E120"
+[2026-06-10T00:13:51.461Z] [searchData] Processed Query: "e120"
+[2026-06-10T00:13:51.461Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-10T00:13:51.461Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-10T00:13:51.462Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-10T00:13:51.462Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:51.462Z] [searchData] Raw Query: "120"
+[2026-06-10T00:13:51.462Z] [searchData] Processed Query: "120"
+[2026-06-10T00:13:51.462Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:13:51.472Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:13:51.472Z] [searchData] Raw Query: "Кармин"
+[2026-06-10T00:13:51.472Z] [searchData] Processed Query: "кармин"
+[2026-06-10T00:13:51.472Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:14:13.620Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:14:13.620Z] [searchData] Raw Query: "Madi Burger"
+[2026-06-10T00:14:13.621Z] [searchData] Processed Query: "madi burger"
+[2026-06-10T00:14:13.622Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:14:13.629Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:14:13.629Z] [searchData] Raw Query: "Inactive Cafe"
+[2026-06-10T00:14:13.629Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-10T00:14:13.629Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:14:13.632Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:14:13.632Z] [searchData] Raw Query: "mad burge"
+[2026-06-10T00:14:13.632Z] [searchData] Processed Query: "mad burge"
+[2026-06-10T00:14:13.632Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:14:13.635Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:14:13.635Z] [searchData] Raw Query: "E120"
+[2026-06-10T00:14:13.635Z] [searchData] Processed Query: "e120"
+[2026-06-10T00:14:13.635Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-10T00:14:13.636Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-10T00:14:13.636Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-10T00:14:13.636Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:14:13.636Z] [searchData] Raw Query: "120"
+[2026-06-10T00:14:13.636Z] [searchData] Processed Query: "120"
+[2026-06-10T00:14:13.636Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:14:13.639Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:14:13.639Z] [searchData] Raw Query: "Кармин"
+[2026-06-10T00:14:13.640Z] [searchData] Processed Query: "кармин"
+[2026-06-10T00:14:13.640Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:18:05.677Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:18:05.677Z] [searchData] Raw Query: "Madi Burger"
+[2026-06-10T00:18:05.678Z] [searchData] Processed Query: "madi burger"
+[2026-06-10T00:18:05.679Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:18:05.686Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:18:05.686Z] [searchData] Raw Query: "Inactive Cafe"
+[2026-06-10T00:18:05.686Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-10T00:18:05.686Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:18:05.688Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:18:05.688Z] [searchData] Raw Query: "mad burge"
+[2026-06-10T00:18:05.688Z] [searchData] Processed Query: "mad burge"
+[2026-06-10T00:18:05.688Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:18:05.690Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:18:05.691Z] [searchData] Raw Query: "E120"
+[2026-06-10T00:18:05.691Z] [searchData] Processed Query: "e120"
+[2026-06-10T00:18:05.691Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-10T00:18:05.691Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-10T00:18:05.691Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-10T00:18:05.692Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:18:05.692Z] [searchData] Raw Query: "120"
+[2026-06-10T00:18:05.692Z] [searchData] Processed Query: "120"
+[2026-06-10T00:18:05.692Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:18:05.695Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:18:05.695Z] [searchData] Raw Query: "Кармин"
+[2026-06-10T00:18:05.695Z] [searchData] Processed Query: "кармин"
+[2026-06-10T00:18:05.696Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:19:05.601Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T00:19:06.971Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T00:19:07.203Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T00:19:07.203Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T00:19:11.367Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T00:25:58.192Z] 📩 Incoming message from Damuhalal: "Ассалаумағалейкум"
+[2026-06-10T00:26:00.787Z] [Agentic Chat] Starting Gemini single-chat session with 0 history items
+[2026-06-10T00:26:02.328Z] ❌ [ERROR IN AGENT TEXT HANDLER]: {"error":{"code":404,"message":"Publisher Model `projects/momyn-t1/locations/us-central1/publishers/google/models/gemini-3.5-flash` was not found or your project does not have access to it. Please ensure you are using a valid model version. For more information, see: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions","status":"NOT_FOUND"}}
+Stack: ApiError: {"error":{"code":404,"message":"Publisher Model `projects/momyn-t1/locations/us-central1/publishers/google/models/gemini-3.5-flash` was not found or your project does not have access to it. Please ensure you are using a valid model version. For more information, see: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions","status":"NOT_FOUND"}}
+    at throwErrorIfNotOK (/app/applet/node_modules/@google/genai/src/_api_client.ts:953:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async <anonymous> (/app/applet/node_modules/@google/genai/src/_api_client.ts:561:9)
+    at async Models.Models.generateContent (/app/applet/node_modules/@google/genai/src/models.ts:128:14)
+    at async <anonymous> (/app/applet/node_modules/@google/genai/src/chats.ts:198:24)
+    at async Chat.sendMessage (/app/applet/node_modules/@google/genai/src/chats.ts:222:5)
+    at async handleTextMessage (/app/applet/src/server/src_server_bot_handlers_text.ts:105:20)
+    at async execute (/app/applet/node_modules/telegraf/lib/composer.js:518:17)
+    at async /app/applet/node_modules/telegraf/lib/composer.js:519:21
+    at async execute (/app/applet/node_modules/telegraf/lib/composer.js:518:17)
+[2026-06-10T00:28:24.176Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:28:24.177Z] [searchData] Raw Query: "Madi Burger"
+[2026-06-10T00:28:24.178Z] [searchData] Processed Query: "madi burger"
+[2026-06-10T00:28:24.178Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:28:24.185Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:28:24.185Z] [searchData] Raw Query: "Inactive Cafe"
+[2026-06-10T00:28:24.186Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-10T00:28:24.186Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:28:24.188Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:28:24.188Z] [searchData] Raw Query: "mad burge"
+[2026-06-10T00:28:24.188Z] [searchData] Processed Query: "mad burge"
+[2026-06-10T00:28:24.188Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:28:24.190Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:28:24.190Z] [searchData] Raw Query: "E120"
+[2026-06-10T00:28:24.190Z] [searchData] Processed Query: "e120"
+[2026-06-10T00:28:24.190Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-10T00:28:24.190Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-10T00:28:24.191Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-10T00:28:24.191Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:28:24.191Z] [searchData] Raw Query: "120"
+[2026-06-10T00:28:24.192Z] [searchData] Processed Query: "120"
+[2026-06-10T00:28:24.192Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:28:24.195Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:28:24.195Z] [searchData] Raw Query: "Кармин"
+[2026-06-10T00:28:24.195Z] [searchData] Processed Query: "кармин"
+[2026-06-10T00:28:24.195Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:28:42.381Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T00:28:43.480Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T00:28:43.708Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T00:28:43.709Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T00:28:48.678Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T00:28:52.648Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T00:28:53.785Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T00:28:54.014Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T00:28:54.014Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T00:28:58.450Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T00:31:00.376Z] 📩 Incoming message from Damuhalal: "Ассалаумағалейкум"
+[2026-06-10T00:31:03.228Z] [Agentic Chat] Starting Gemini single-chat session with 0 history items
+[2026-06-10T00:31:24.802Z] 📩 Incoming message from Damuhalal: "Не істеп жатырсың"
+[2026-06-10T00:31:27.433Z] [Agentic Chat] Starting Gemini single-chat session with 2 history items
+[2026-06-10T00:31:58.417Z] 📩 Incoming message from Damuhalal: "Хани брендін ізде"
+[2026-06-10T00:32:00.963Z] [Agentic Chat] Starting Gemini single-chat session with 4 history items
+[2026-06-10T00:32:03.458Z] [Agent ToolCall] Executing search_halal_companies with query: "Хани бренді"
+[2026-06-10T00:32:03.459Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:32:03.459Z] [searchData] Raw Query: "Хани бренді"
+[2026-06-10T00:32:03.460Z] [searchData] Processed Query: "хани бренді"
+[2026-06-10T00:32:03.460Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "хани бренді"...
+[2026-06-10T00:32:06.354Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T00:32:06.354Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T00:32:07.249Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:32:07.570Z] [Agent ToolCall] searchData returned 7 items
+[2026-06-10T00:32:52.418Z] 📩 Incoming message from Damuhalal: "Қарағанды қаласындағылары ғана керек"
+[2026-06-10T00:32:54.941Z] [Agentic Chat] Starting Gemini single-chat session with 6 history items
+[2026-06-10T00:34:00.259Z] 📩 Incoming message from Damuhalal: "Республика көшесі 13 көшесіндегі хани халал ма"
+[2026-06-10T00:34:02.797Z] [Agentic Chat] Starting Gemini single-chat session with 8 history items
+[2026-06-10T00:45:13.018Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:45:13.019Z] [searchData] Raw Query: "Madi Burger"
+[2026-06-10T00:45:13.019Z] [searchData] Processed Query: "madi burger"
+[2026-06-10T00:45:13.020Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:45:13.026Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:45:13.027Z] [searchData] Raw Query: "Inactive Cafe"
+[2026-06-10T00:45:13.027Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-10T00:45:13.027Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:45:13.029Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:45:13.029Z] [searchData] Raw Query: "mad burge"
+[2026-06-10T00:45:13.029Z] [searchData] Processed Query: "mad burge"
+[2026-06-10T00:45:13.029Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:45:13.030Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:45:13.030Z] [searchData] Raw Query: "E120"
+[2026-06-10T00:45:13.030Z] [searchData] Processed Query: "e120"
+[2026-06-10T00:45:13.031Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-10T00:45:13.031Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-10T00:45:13.031Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-10T00:45:13.032Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:45:13.032Z] [searchData] Raw Query: "120"
+[2026-06-10T00:45:13.032Z] [searchData] Processed Query: "120"
+[2026-06-10T00:45:13.032Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:45:13.035Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:45:13.035Z] [searchData] Raw Query: "Кармин"
+[2026-06-10T00:45:13.035Z] [searchData] Processed Query: "кармин"
+[2026-06-10T00:45:13.035Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:45:32.292Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T00:45:33.443Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T00:45:33.671Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T00:45:33.672Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T00:45:37.824Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T00:48:22.117Z] 📩 Incoming message from Damuhalal: "Қарағандыдағы хани ларды айтшы"
+[2026-06-10T00:48:24.973Z] [Agentic Chat] Starting Gemini single-chat session with 0 history items
+[2026-06-10T00:48:39.649Z] 📩 Incoming message from Damuhalal: "Хани бренді"
+[2026-06-10T00:48:42.176Z] [Agentic Chat] Starting Gemini single-chat session with 2 history items
+[2026-06-10T00:48:44.970Z] [Agent ToolCall] Executing search_halal_companies with query: "Хани бренді Қарағанды"
+[2026-06-10T00:48:44.971Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:48:44.971Z] [searchData] Raw Query: "Хани бренді Қарағанды"
+[2026-06-10T00:48:44.971Z] [searchData] Processed Query: "хани бренді қарағанды"
+[2026-06-10T00:48:44.971Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-10T00:48:44.972Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "хани бренді қарағанды"...
+[2026-06-10T00:48:45.338Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T00:48:45.339Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T00:48:46.323Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T00:48:46.677Z] [Agent ToolCall] searchData returned 7 items
+[2026-06-10T00:53:19.503Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:53:19.504Z] [searchData] Raw Query: "Madi Burger"
+[2026-06-10T00:53:19.504Z] [searchData] Processed Query: "madi burger"
+[2026-06-10T00:53:19.505Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:53:19.511Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:53:19.511Z] [searchData] Raw Query: "Inactive Cafe"
+[2026-06-10T00:53:19.511Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-10T00:53:19.511Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:53:19.514Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:53:19.514Z] [searchData] Raw Query: "mad burge"
+[2026-06-10T00:53:19.514Z] [searchData] Processed Query: "mad burge"
+[2026-06-10T00:53:19.514Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:53:19.515Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:53:19.516Z] [searchData] Raw Query: "E120"
+[2026-06-10T00:53:19.516Z] [searchData] Processed Query: "e120"
+[2026-06-10T00:53:19.516Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-10T00:53:19.516Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-10T00:53:19.516Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-10T00:53:19.517Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:53:19.517Z] [searchData] Raw Query: "120"
+[2026-06-10T00:53:19.517Z] [searchData] Processed Query: "120"
+[2026-06-10T00:53:19.517Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T00:53:19.520Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T00:53:19.520Z] [searchData] Raw Query: "Кармин"
+[2026-06-10T00:53:19.520Z] [searchData] Processed Query: "кармин"
+[2026-06-10T00:53:19.520Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T03:01:22.949Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T03:01:24.068Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T03:01:24.404Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T03:01:24.405Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T03:01:29.159Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T03:02:03.815Z] 📩 Incoming message from Damuhalal: "Ассалаумағалейкум"
+[2026-06-10T03:02:06.642Z] [Agentic Chat] Starting Gemini single-chat session with 0 history items
+[2026-06-10T03:02:47.048Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:02:47.048Z] [searchData] Raw Query: "ALTYN"
+[2026-06-10T03:02:47.048Z] [searchData] Processed Query: "altyn"
+[2026-06-10T03:02:47.049Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "altyn"...
+[2026-06-10T03:02:47.418Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T03:02:47.418Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T03:02:48.833Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T03:03:50.831Z] 📩 Incoming message from Damuhalal: "Алматыдағы ет сататын орындарды айтшы"
+[2026-06-10T03:03:53.522Z] [Agentic Chat] Starting Gemini single-chat session with 0 history items
+[2026-06-10T03:03:56.470Z] [Agent ToolCall] Executing search_halal_companies with query: "Алматыдағы ет сататын орындар"
+[2026-06-10T03:03:56.470Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:03:56.470Z] [searchData] Raw Query: "Алматыдағы ет сататын орындар"
+[2026-06-10T03:03:56.470Z] [searchData] Processed Query: "алматыдағы ет сататын орындар"
+[2026-06-10T03:03:56.471Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "алматыдағы ет сататын орындар"...
+[2026-06-10T03:04:02.887Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T03:04:02.887Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T03:04:03.822Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T03:04:04.159Z] [Agent ToolCall] searchData returned 7 items
+[2026-06-10T03:04:04.160Z] [Agent ToolCall Error] Model crashed on receiving tool execution results: ContentUnion is required
+[2026-06-10T03:08:49.933Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:08:49.933Z] [searchData] Raw Query: "Madi Burger"
+[2026-06-10T03:08:49.934Z] [searchData] Processed Query: "madi burger"
+[2026-06-10T03:08:49.935Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T03:08:49.943Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:08:49.943Z] [searchData] Raw Query: "Inactive Cafe"
+[2026-06-10T03:08:49.943Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-10T03:08:49.944Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T03:08:49.946Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:08:49.947Z] [searchData] Raw Query: "mad burge"
+[2026-06-10T03:08:49.947Z] [searchData] Processed Query: "mad burge"
+[2026-06-10T03:08:49.947Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T03:08:49.949Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:08:49.949Z] [searchData] Raw Query: "E120"
+[2026-06-10T03:08:49.949Z] [searchData] Processed Query: "e120"
+[2026-06-10T03:08:49.949Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-10T03:08:49.949Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-10T03:08:49.950Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-10T03:08:49.950Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:08:49.950Z] [searchData] Raw Query: "120"
+[2026-06-10T03:08:49.950Z] [searchData] Processed Query: "120"
+[2026-06-10T03:08:49.950Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T03:08:49.953Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:08:49.954Z] [searchData] Raw Query: "Кармин"
+[2026-06-10T03:08:49.954Z] [searchData] Processed Query: "кармин"
+[2026-06-10T03:08:49.954Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T03:09:00.604Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T03:09:01.911Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T03:09:02.141Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T03:09:02.141Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T03:09:06.350Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T03:09:12.889Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T03:09:14.147Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T03:09:14.374Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T03:09:14.375Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T03:09:18.617Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T03:10:31.351Z] 📩 Incoming message from Damuhalal: "Алматыдағы ет сататын орындарды айтшы"
+[2026-06-10T03:10:34.028Z] [Agentic Chat] Starting Gemini single-chat session with 0 history items
+[2026-06-10T03:10:42.892Z] [Agent ToolCall] Executing search_halal_companies with query: "Алматыдағы ет сататын орындар"
+[2026-06-10T03:10:42.893Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:10:42.893Z] [searchData] Raw Query: "Алматыдағы ет сататын орындар"
+[2026-06-10T03:10:42.893Z] [searchData] Processed Query: "алматыдағы ет сататын орындар"
+[2026-06-10T03:10:42.894Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "алматыдағы ет сататын орындар"...
+[2026-06-10T03:10:43.324Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T03:10:43.324Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T03:10:45.555Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T03:10:45.908Z] [Agent ToolCall] searchData returned 7 items
+[2026-06-10T03:15:48.383Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:15:48.384Z] [searchData] Raw Query: "Алматы ет"
+[2026-06-10T03:15:48.384Z] [searchData] Processed Query: "алматы ет"
+[2026-06-10T03:15:48.384Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-10T03:15:48.384Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T03:17:37.506Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:17:37.506Z] [searchData] Raw Query: "алматы ет"
+[2026-06-10T03:17:37.506Z] [searchData] Processed Query: "алматы ет"
+[2026-06-10T03:17:37.507Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-10T03:17:37.507Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T03:17:37.737Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:17:37.737Z] [searchData] Raw Query: "алматыдағы ет сататын орындар"
+[2026-06-10T03:17:37.737Z] [searchData] Processed Query: "алматыдағы ет сататын орындар"
+[2026-06-10T03:17:37.737Z] [searchData] ⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.
+[2026-06-10T03:18:47.374Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:18:47.374Z] [searchData] Raw Query: "алматы ет"
+[2026-06-10T03:18:47.374Z] [searchData] Processed Query: "алматы ет"
+[2026-06-10T03:18:47.375Z] [searchData] ⏭️ [E-Code search skipped] Query contains company or city keywords.
+[2026-06-10T03:18:47.375Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "алматы ет"...
+[2026-06-10T03:18:49.070Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T03:18:49.070Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T03:18:50.002Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T03:18:50.226Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-10T03:18:50.226Z] [searchData] Raw Query: "алматыдағы ет сататын орындар"
+[2026-06-10T03:18:50.226Z] [searchData] Processed Query: "алматыдағы ет сататын орындар"
+[2026-06-10T03:18:50.227Z] [searchData] 📡 [Vector Search] Ембеддинг жасалуда: "алматыдағы ет сататын орындар"...
+[2026-06-10T03:18:50.752Z] [searchData] Embedding generated successfully. Vector length: 1536
+[2026-06-10T03:18:50.753Z] [searchData] 📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...
+[2026-06-10T03:18:51.579Z] [searchData] 📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: 10
+[2026-06-10T03:20:57.125Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T03:20:58.293Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T03:20:58.524Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T03:20:58.524Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T03:21:03.115Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T03:43:59.032Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T03:44:00.163Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T03:44:00.393Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T03:44:00.393Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T03:44:08.619Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T03:44:09.774Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T03:44:10.011Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T03:44:10.012Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T03:44:14.474Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T03:53:26.247Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T03:53:27.352Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T03:53:27.580Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T03:53:27.580Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T03:53:34.721Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T03:53:36.039Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T03:53:36.271Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T03:53:36.272Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T03:53:40.577Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-10T04:06:11.118Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-10T04:06:12.269Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-10T04:06:12.498Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-10T04:06:12.499Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-10T04:06:19.090Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)

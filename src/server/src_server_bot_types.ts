@@ -14,6 +14,9 @@ export interface MySession {
   searchSubject?: string;
   isPhoto?: boolean;
   
+  aiIntro?: string;
+  aiOutro?: string;
+  
   // Custom manual session safety to avoid empty states
   is_active?: boolean;
 }
