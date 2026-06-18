@@ -1020,3 +1020,166 @@ Stack: ApiError: {"error":{"code":404,"message":"Publisher Model `projects/momyn
 [2026-06-10T04:06:12.498Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
 [2026-06-10T04:06:12.499Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
 [2026-06-10T04:06:19.090Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-17T06:29:23.099Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T06:29:24.285Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T06:29:24.516Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T06:29:24.516Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T06:29:29.250Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: false)
+[2026-06-17T06:29:44.559Z] ⏳ [Sync Batch] Top 1 / 1 (15 / 15 мекеме)...
+[2026-06-17T06:29:45.308Z] 📩 Incoming message from Damuhalal: "Нан"
+[2026-06-17T06:29:47.116Z] ❌ [Sync Error] Сәйкес мекенді өңдеу сәтсіз аяқталды (ID: 23415): Error: No values in embedding response
+    at fetchFn (/app/applet/src/server/src_server_aiClient.ts:324:14)
+    at async retryWithBackoff (/app/applet/src/server/src_server_aiClient.ts:252:12)
+[2026-06-17T06:29:47.992Z] ❌ [Sync Error] Сәйкес мекенді өңдеу сәтсіз аяқталды (ID: 23554): Error: No values in embedding response
+    at fetchFn (/app/applet/src/server/src_server_aiClient.ts:324:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async retryWithBackoff (/app/applet/src/server/src_server_aiClient.ts:252:12)
+[2026-06-17T06:29:48.063Z] [Agentic Chat] Starting Gemini single-chat session with 0 history items
+[2026-06-17T06:36:14.443Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T06:36:16.060Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T06:36:16.296Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T06:36:16.297Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T06:36:20.905Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-17T06:36:35.670Z] ⏳ [Sync Batch] Топ 1 / 1 (15 / 15 мекеме)...
+[2026-06-17T06:36:37.141Z] [Sync] Processed batch of 15 companies. Current total: 15
+[2026-06-17T06:44:18.991Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T06:44:20.606Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T06:44:20.847Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T06:44:20.848Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T06:44:25.258Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-17T06:46:37.718Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T06:46:39.303Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T06:46:39.538Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T06:46:39.539Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T06:46:43.014Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-17T06:54:21.217Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T06:54:23.010Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T06:54:23.252Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T06:54:23.253Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T06:54:27.429Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-17T07:14:15.010Z] 📩 Incoming message from Damuhalal: "Нан"
+[2026-06-17T07:14:18.082Z] [Agentic Chat] Starting Gemini single-chat session with 1 history items
+[2026-06-17T07:17:35.903Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T07:17:37.470Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T07:17:37.700Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T07:17:37.701Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T07:17:42.196Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-17T07:17:59.448Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T07:18:01.155Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T07:18:01.385Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T07:18:01.386Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T07:18:05.891Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-17T07:18:29.180Z] 📩 Incoming message from Damuhalal: "Нан"
+[2026-06-17T07:18:31.909Z] [Agentic Chat] Starting Gemini single-chat session with 0 history items
+[2026-06-17T07:18:34.607Z] [Agent ToolCall] Executing getCityList
+[2026-06-17T07:18:50.306Z] 📩 Incoming message from Damuhalal: "Алматы"
+[2026-06-17T07:18:53.001Z] [Agentic Chat] Starting Gemini single-chat session with 2 history items
+[2026-06-17T07:18:56.265Z] [Agent ToolCall] Executing searchHalalPlaces with query: "нан", city: "Алматы", category: "undefined"
+[2026-06-17T07:18:56.266Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T07:18:56.266Z] [searchData] Raw Query: "нан", City: "Алматы"
+[2026-06-17T07:18:56.266Z] [searchData] Processed Query: "нан"
+[2026-06-17T07:18:56.443Z] [searchData] 📍 [City Filter] Аралас нәтижелер қала бойынша сүзілуде: алматы
+[2026-06-17T07:18:56.444Z] [searchData] 📍 [City Filter] Сүзгіден кейін қалған мекемелер саны: 115
+[2026-06-17T07:18:56.444Z] [Agent ToolCall] searchData returned 7 items
+[2026-06-17T07:21:07.000Z] 📩 Incoming message from Damuhalal: "Маки маки"
+[2026-06-17T07:21:09.694Z] [Agentic Chat] Starting Gemini single-chat session with 4 history items
+[2026-06-17T07:21:11.687Z] [Agent ToolCall] Executing searchHalalPlaces with query: "Маки маки", city: "Алматы", category: "undefined"
+[2026-06-17T07:21:11.687Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T07:21:11.687Z] [searchData] Raw Query: "Маки маки", City: "Алматы"
+[2026-06-17T07:21:11.688Z] [searchData] Processed Query: "маки маки"
+[2026-06-17T07:21:11.920Z] [searchData] 📍 [City Filter] Аралас нәтижелер қала бойынша сүзілуде: алматы
+[2026-06-17T07:21:11.921Z] [searchData] 📍 [City Filter] Сүзгіден кейін қалған мекемелер саны: 150
+[2026-06-17T07:21:11.922Z] [Agent ToolCall] searchData returned 7 items
+[2026-06-17T07:26:56.631Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T07:26:58.215Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T07:26:58.460Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T07:26:58.461Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T07:27:02.833Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-17T07:27:10.907Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T07:27:12.623Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T07:27:12.869Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T07:27:12.870Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T07:27:17.234Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-17T08:18:27.894Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:18:27.894Z] [searchData] Raw Query: "нан", City: "undefined"
+[2026-06-17T08:18:27.894Z] [searchData] Processed Query: "нан"
+[2026-06-17T08:18:28.052Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:18:28.052Z] [searchData] Raw Query: "маки маки", City: "undefined"
+[2026-06-17T08:18:28.052Z] [searchData] Processed Query: "маки маки"
+[2026-06-17T08:18:28.245Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:18:28.245Z] [searchData] Raw Query: "дегірмен", City: "undefined"
+[2026-06-17T08:18:28.245Z] [searchData] Processed Query: "дегірмен"
+[2026-06-17T08:18:28.399Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:18:28.399Z] [searchData] Raw Query: "degirmen", City: "undefined"
+[2026-06-17T08:18:28.399Z] [searchData] Processed Query: "degirmen"
+[2026-06-17T08:19:45.727Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-17T08:19:47.451Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-17T08:19:47.695Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-17T08:19:47.695Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-17T08:19:50.787Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-17T08:38:38.487Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:38:38.487Z] [searchData] Raw Query: "нан", City: "undefined"
+[2026-06-17T08:38:38.487Z] [searchData] Processed Query: "нан"
+[2026-06-17T08:38:38.520Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:38:38.520Z] [searchData] Raw Query: "маки маки", City: "undefined"
+[2026-06-17T08:38:38.520Z] [searchData] Processed Query: "маки маки"
+[2026-06-17T08:38:38.551Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:38:38.551Z] [searchData] Raw Query: "дегірмен", City: "undefined"
+[2026-06-17T08:38:38.551Z] [searchData] Processed Query: "дегірмен"
+[2026-06-17T08:38:38.582Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:38:38.583Z] [searchData] Raw Query: "degirmen", City: "undefined"
+[2026-06-17T08:38:38.583Z] [searchData] Processed Query: "degirmen"
+[2026-06-17T08:39:54.145Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:39:54.146Z] [searchData] Raw Query: "нан", City: "undefined"
+[2026-06-17T08:39:54.146Z] [searchData] Processed Query: "нан"
+[2026-06-17T08:39:54.180Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:39:54.180Z] [searchData] Raw Query: "маки маки", City: "undefined"
+[2026-06-17T08:39:54.181Z] [searchData] Processed Query: "маки маки"
+[2026-06-17T08:39:54.212Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:39:54.212Z] [searchData] Raw Query: "дегірмен", City: "undefined"
+[2026-06-17T08:39:54.213Z] [searchData] Processed Query: "дегірмен"
+[2026-06-17T08:39:54.238Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:39:54.238Z] [searchData] Raw Query: "degirmen", City: "undefined"
+[2026-06-17T08:39:54.238Z] [searchData] Processed Query: "degirmen"
+[2026-06-17T08:40:53.979Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:40:53.979Z] [searchData] Raw Query: "Madi Burger", City: "undefined"
+[2026-06-17T08:40:53.980Z] [searchData] Processed Query: "madi burger"
+[2026-06-17T08:40:53.984Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:40:53.985Z] [searchData] Raw Query: "Inactive Cafe", City: "undefined"
+[2026-06-17T08:40:53.985Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-17T08:40:53.986Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:40:53.986Z] [searchData] Raw Query: "mad burge", City: "undefined"
+[2026-06-17T08:40:53.986Z] [searchData] Processed Query: "mad burge"
+[2026-06-17T08:40:53.988Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:40:53.988Z] [searchData] Raw Query: "E120", City: "undefined"
+[2026-06-17T08:40:53.988Z] [searchData] Processed Query: "e120"
+[2026-06-17T08:40:53.988Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-17T08:40:53.989Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-17T08:40:53.989Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-17T08:40:53.990Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:40:53.990Z] [searchData] Raw Query: "120", City: "undefined"
+[2026-06-17T08:40:53.990Z] [searchData] Processed Query: "120"
+[2026-06-17T08:40:53.992Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-17T08:40:53.992Z] [searchData] Raw Query: "Кармин", City: "undefined"
+[2026-06-17T08:40:53.992Z] [searchData] Processed Query: "кармин"

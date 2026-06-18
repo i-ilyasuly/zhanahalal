@@ -172,29 +172,15 @@ async function startServer() {
   app.get("/api/admin/sync-status", async (req, res) => {
     console.log("📊 [Admin Sync Status] Статусты есептеу басталды...");
     try {
-      // 1. Жалпы саны және 2. Векторы барлардың саны
+      // 1. Жалпы саны
       // select() арқылы тек қажетті өрістерді оқып, жылдамдық пен жадты үнемдейміз
       const snapshot = await db.collection("search_companies")
-        .select("search_fields.embedding", "updated_at", "title")
+        .select("updated_at", "title")
         .get();
 
       const total_companies = snapshot.size;
-      let embedded_companies = 0;
-      for (const doc of snapshot.docs) {
-        const data = doc.data();
-        const embValue = data.search_fields?.embedding;
-        if (embValue) {
-          if (Array.isArray(embValue)) {
-            if (embValue.length > 0) {
-              embedded_companies++;
-            }
-          } else if (typeof embValue === "object") {
-            embedded_companies++;
-          }
-        }
-      }
 
-      // 3. Деректер құрылымын тексеру (Сынақ үлгісі ретінде алғашқы 5 мекеме)
+      // 2. Деректер құрылымын тексеру (Сынақ үлгісі ретінде алғашқы 5 мекеме)
       const sample_companies = snapshot.docs.slice(0, 5).map(doc => {
         const data = doc.data();
         const raw_updated_at = data.updated_at;
@@ -209,8 +195,7 @@ async function startServer() {
           id: doc.id,
           title: data.title || "",
           updated_at: raw_updated_at,
-          updated_at_type: updated_at_type,
-          has_embedding: !!(data.search_fields?.embedding)
+          updated_at_type: updated_at_type
         };
       });
 
@@ -218,7 +203,6 @@ async function startServer() {
         success: true,
         status: "Diagnostic finished",
         total_companies,
-        embedded_companies,
         last_sync_error: lastSyncError || null,
         sample_companies
       });
@@ -278,59 +262,24 @@ async function startServer() {
       report.step1_firestore = `FAILED: ${e.message || String(e)}`;
     }
 
-    // 2-ҚАДАМ: GEMINI EMBEDDING API СЫНАУ (Test Embedding)
-    let testVector: number[] | null = null;
+    // 2-ҚАДАМ: GEMINI МӘТІН ГЕНЕРАЦИЯСЫН СЫНАУ (Test Gemini Generation)
     try {
-      const { ai, GEMINI_EMBEDDING_MODEL } = await import("./src/server/src_server_aiClient.js");
-      const embeddingResponse = await ai.models.embedContent({
-        model: GEMINI_EMBEDDING_MODEL,
-        contents: "тест"
+      const { ai, GEMINI_GENERATION_MODEL } = await import("./src/server/src_server_aiClient.js");
+      const genResponse = await ai.models.generateContent({
+        model: GEMINI_GENERATION_MODEL,
+        contents: "Сәлем"
       });
-      const values = embeddingResponse?.embeddings?.[0]?.values || (embeddingResponse as any)?.embedding?.values;
-      if (values && values.length > 0) {
-        testVector = values;
-        report.step2_gemini = `OK (Vector length: ${values.length})`;
+      if (genResponse && genResponse.text) {
+        report.step2_gemini = `OK (Response: ${genResponse.text.trim().substring(0, 30)}...)`;
       } else {
-        report.step2_gemini = "FAILED: Embedding returned empty values";
+        report.step2_gemini = "FAILED: Client returned empty response";
       }
     } catch (e: any) {
       report.step2_gemini = `FAILED: ${e.message || String(e)}`;
     }
 
-    // 3-ҚАДАМ: ВЕКТОРЛЫҚ СҰРАНЫСТЫ СЫНАУ (Test Vector Query)
-    if (testVector) {
-      try {
-        let wrappedTestVector: any = testVector;
-        try {
-          if (admin.firestore && admin.firestore.FieldValue && typeof (admin.firestore.FieldValue as any).vector === "function") {
-            wrappedTestVector = (admin.firestore.FieldValue as any).vector(testVector);
-            console.log("📡 [FieldValue.vector] testVector wrapped successfully in diagnostic.");
-          } else if ((admin.firestore as any).VectorValue && typeof (admin.firestore as any).VectorValue.create === "function") {
-            wrappedTestVector = (admin.firestore as any).VectorValue.create(testVector);
-            console.log("📡 [VectorValue.create] testVector wrapped successfully in diagnostic.");
-          }
-        } catch (e: any) {
-          console.warn("⚠️ Diagnostic queryVector wrapping error (using raw array instead):", e.message || String(e));
-        }
-
-        const vectorQuery = db.collection('search_companies')
-          .findNearest({
-            vectorField: 'search_fields.embedding',
-            queryVector: wrappedTestVector,
-            distanceMeasure: 'COSINE',
-            limit: 10
-          });
-        const vectorSnapshot = await vectorQuery.get();
-        report.step3_vector_query = `OK (Found ${vectorSnapshot.docs.length} companies)`;
-      } catch (e: any) {
-        report.step3_vector_query = `FAILED: ${e.message || String(e)}`;
-        if (e.stack) {
-          console.error("❌ Diagnostic step 3 error trace:", e.stack);
-        }
-      }
-    } else {
-      report.step3_vector_query = "FAILED: Skipped because step 2 (embedding) failed";
-    }
+    // 3-ҚАДАМ: ВЕКТОРЛЫҚ СҰРАНЫСТЫ СЫНАУ (Ембеддинг жойылды)
+    report.step3_vector_query = "SKIPPED: Векторлық іздеу толықтай жойылды (Дерекқор жеңіл және жылдам мәтіндік іздеуге өткізілді)";
 
     res.status(200).json(report);
   });

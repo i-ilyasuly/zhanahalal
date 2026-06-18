@@ -122,17 +122,29 @@ export async function sendSearchPage(ctx: MyContext, page: number = 0, isPhoto: 
       msgText += `${escapeHTML(addr)}\n`;
     }
 
-    const cert = String(r.certificate_status || "").trim().toLowerCase();
-    const isActive = cert === 'active' || cert === 'белсенді' || cert === 'активті' || cert === 'актив';
-    if (!isActive) {
-      msgText += `⚠️ <i>Сертификат мерзімі аяқталған немесе тоқтатылған!</i>\n`;
+    const isIngredient = r.type === 'Қоспа';
+    let isActive = false;
+    let statusStyle = 'primary';
+    if (isIngredient) {
+      isActive = r.status === 'halal';
+      statusStyle = r.status === 'halal' ? 'success' : (r.status === 'haram' ? 'danger' : 'primary');
+      const statusEmoji = r.status === 'halal' ? '✅' : (r.status === 'haram' ? '❌' : '⚠️');
+      const statusText = r.status === 'halal' ? 'Халал' : (r.status === 'haram' ? 'Харам' : 'Күдікті');
+      msgText += `📊 Статус: ${statusEmoji} <b>${statusText}</b>\n`;
+    } else {
+      const cert = String(r.certificate_status || "").trim().toLowerCase();
+      isActive = cert === 'active' || cert === 'белсенді' || cert === 'активті' || cert === 'актив';
+      statusStyle = isActive ? 'success' : 'danger';
+      if (!isActive) {
+        msgText += `⚠️ <i>Сертификат мерзімі аяқталған немесе тоқтатылған!</i>\n`;
+      }
     }
     msgText += `\n`;
 
     itemButtons.push({
       text: `${itemNumber}`,
       callback_data: `item_${globalIndex}`,
-      style: isActive ? 'success' : 'danger'
+      style: statusStyle
     } as any);
   });
 

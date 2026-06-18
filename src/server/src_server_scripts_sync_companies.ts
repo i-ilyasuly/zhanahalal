@@ -1,7 +1,7 @@
 import { db } from "./src_server_db.js";
 import admin from "firebase-admin";
 import https from "https";
-import { ai, GEMINI_EMBEDDING_MODEL, getDocumentEmbedding } from "./src_server_aiClient.js";
+import { ai } from "./src_server_aiClient.js";
 import { FieldValue } from "firebase-admin/firestore";
 import fs from "fs";
 import path from "path";
@@ -87,101 +87,20 @@ function getCategoryTranslation(categoryType: string): string {
   }
 }
 
-async function getCompanyImageBase64(imageUrl: string): Promise<{ data: string; mimeType: string } | null> {
-  try {
-    const res = await fetch(imageUrl);
-    if (!res.ok) {
-      return null;
-    }
-    const buf = await res.arrayBuffer();
-    const base64Bytes = Buffer.from(buf).toString("base64");
-    
-    let mimeType = res.headers.get("content-type") || "image/jpeg";
-    mimeType = mimeType.split(";")[0].trim();
-    if (!mimeType.startsWith("image/")) {
-      mimeType = "image/jpeg";
-    }
-    return { data: base64Bytes, mimeType };
-  } catch (err: any) {
-    console.warn(`⚠️ [Image Fetch] Error fetching image ${imageUrl}:`, err.message || err);
-    return null;
-  }
-}
-
-async function getEmbedding(text: string, image?: { data: string; mimeType: string } | null): Promise<number[]> {
-  try {
-    const values = await getDocumentEmbedding(text, image);
-    if (values && values.length > 0) {
-      if (values.length !== 1536) {
-        throw new Error(`Expected embedding size 1536, got ${values.length}`);
-      }
-      return values;
-    }
-    throw new Error("No values in embedding response");
-  } catch (err) {
-    console.error(`⚠️ Embedding алу барысында қате шықты:`, err);
-    throw err; // Тікелей лақтырамыз (rethrow)
-  }
-}
+// Сәйкес сурет және ембеддинг функциялары өшірілді
 
 export async function runSync(force: boolean = false, onProgress?: (msg: string) => void) {
-  writeSyncLog(`🚀 HalalDamu API арқылы мекемелерді жаңарту және ақылды векторлау басталды... (force: ${force})`, onProgress);
+  writeSyncLog(`🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: ${force})`, onProgress);
 
   try {
-    // 0. WIPE EXISTING EMBEDDINGS IF force = true
-    if (force) {
-      writeSyncLog("⚠️ [Sync] force=true: Wipe existing embeddings from Firestore started...", onProgress);
-      
-      const querySnapshot = await db.collection("search_companies").get();
-      const allDocs = querySnapshot.docs;
-      
-      writeSyncLog(`🗑️ [Sync] Clearing embeddings for ${allDocs.length} companies...`, onProgress);
-
-      let batch = db.batch();
-      let opCount = 0;
-      let totalWiped = 0;
-
-      for (const doc of allDocs) {
-        const docRef = db.collection("search_companies").doc(doc.id);
-        batch.update(docRef, {
-          "search_fields.embedding": FieldValue.delete()
-        });
-        opCount++;
-        totalWiped++;
-
-        if (opCount === 500) {
-          await batch.commit();
-          batch = db.batch();
-          opCount = 0;
-          writeSyncLog(`🧹 [Sync] Committed bulk wipe batch of ${totalWiped} documents.`, onProgress);
-        }
-      }
-
-      if (opCount > 0) {
-        await batch.commit();
-        writeSyncLog(`🧹 [Sync] Committed final bulk wipe batch of ${totalWiped} documents.`, onProgress);
-      }
-
-      writeSyncLog("✅ [Sync] All existing embeddings wiped successfully from Firestore!", onProgress);
-    }
     // 0. Firestore-дан бұрыннан бар мекемелерді алып, updated_at мәндерінің Map-ін құрамыз
     console.log("📥 Firestore-дағы бар мекемелерді индекстеу...");
     const snapshot = await db.collection("search_companies").get();
-    const existingMap = new Map<string, { updated_at: string, hasEmbedding: boolean }>();
+    const existingMap = new Map<string, { updated_at: string }>();
     for (const doc of snapshot.docs) {
       const data = doc.data();
-      const embValue = data.search_fields?.embedding;
-      let hasEmb = false;
-      if (embValue) {
-        if (Array.isArray(embValue)) {
-          hasEmb = embValue.length > 0;
-        } else if (typeof embValue === "object") {
-          hasEmb = true;
-        }
-      }
       existingMap.set(doc.id, {
-        updated_at: data.updated_at || "",
-        hasEmbedding: hasEmb
+        updated_at: data.updated_at || ""
       });
     }
     console.log(`📌 Firestore-да қазір ${existingMap.size} мекеме бар.`);
@@ -216,7 +135,7 @@ export async function runSync(force: boolean = false, onProgress?: (msg: string)
       const apiUpdatedAt = item.updated_at || "";
       const existing = existingMap.get(idStr);
 
-      if (!force && existing && existing.updated_at === apiUpdatedAt && existing.hasEmbedding) {
+      if (!force && existing && existing.updated_at === apiUpdatedAt) {
         skipCount++;
         continue;
       }
@@ -289,38 +208,6 @@ export async function runSync(force: boolean = false, onProgress?: (msg: string)
       }
       richDescriptionText = richDescriptionText.trim();
 
-      // Сурет сілтемесін алу
-      let imageUrl: string | null = null;
-      if (item.featured_image && typeof item.featured_image === "object" && item.featured_image.full) {
-        imageUrl = item.featured_image.full;
-      } else if (item.logo_image && typeof item.logo_image === "object" && item.logo_image.full) {
-        imageUrl = item.logo_image.full;
-      } else if (typeof item.featured_image === "string") {
-        imageUrl = item.featured_image;
-      } else if (typeof item.logo_image === "string") {
-        imageUrl = item.logo_image;
-      }
-
-      let imageData: { data: string; mimeType: string } | null = null;
-      if (imageUrl) {
-        imageData = await getCompanyImageBase64(imageUrl);
-      }
-
-      // Ембеддинг жасау
-      let embeddingVector: number[] = [];
-      try {
-        embeddingVector = await getEmbedding(richDescriptionText, imageData);
-      } catch (err) {
-        console.error(`❌ Векторлау мүмкін болмады (ID ${idStr}):`, err);
-        throw err;
-      }
-
-      if (!embeddingVector || embeddingVector.length === 0) {
-        throw new Error(`Embedding vector empty for ID ${idStr}`);
-      }
-
-      const vectorValueObj = FieldValue.vector(embeddingVector);
-
       const dataToSave = {
         title: titleCleaned,
         legal_name: legalNameCleaned,
@@ -345,8 +232,7 @@ export async function runSync(force: boolean = false, onProgress?: (msg: string)
         search_fields: {
           synonyms: [],
           ai_description: richDescriptionText,
-          tags: [],
-          embedding: vectorValueObj
+          tags: []
         }
       };
 
@@ -354,17 +240,15 @@ export async function runSync(force: boolean = false, onProgress?: (msg: string)
       await docRef.set(dataToSave, { merge: true });
     };
 
-    // Топтар бойынша (chunks of 15) параллельді өңдеу
-    const chunkSize = 15;
+    // Топтар бойынша (chunks of 100) параллельді өңдеу (LLM квота шектеуі жоқ болғандықтан өте жылдам)
+    const chunkSize = 100;
     for (let i = 0; i < itemsToProcess.length; i += chunkSize) {
       const chunk = itemsToProcess.slice(i, i + chunkSize);
       processedCount += chunk.length;
 
-      writeSyncLog(`⏳ [Sync Batch] Top ${Math.floor(i / chunkSize) + 1} / ${Math.ceil(itemsToProcess.length / chunkSize)} (${chunk.length} / ${itemsToProcess.length} мекеме)...`, onProgress);
+      writeSyncLog(`⏳ [Sync Batch] Топ ${Math.floor(i / chunkSize) + 1} / ${Math.ceil(itemsToProcess.length / chunkSize)} (${chunk.length} / ${itemsToProcess.length} мекеме)...`, onProgress);
 
-      await Promise.all(chunk.map(async (item, idx) => {
-        // Stagger each item in the batch by idx * 850ms to flatten the spike of requests hitting Vertex AI
-        await new Promise(resolve => setTimeout(resolve, idx * 850));
+      await Promise.all(chunk.map(async (item) => {
         try {
           const idStr = String(item.id);
           const existing = existingMap.get(idStr);
@@ -376,16 +260,11 @@ export async function runSync(force: boolean = false, onProgress?: (msg: string)
           }
         } catch (err: any) {
           writeSyncLog(`❌ [Sync Error] Сәйкес мекенді өңдеу сәтсіз аяқталды (ID: ${item.id}): ${err.stack || err.message || err}`, onProgress);
-          throw err; // Квота немесе Vertex AI қатесін сыртқа лақтырамыз (rethrow)
+          throw err;
         }
       }));
 
-      writeSyncLog(`[Sync] Embedded batch of 15 companies. Current total: ${processedCount}`, onProgress);
-
-      // Квотаны қорғау үшін 1 секунд кідіріс
-      if (i + chunkSize < itemsToProcess.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+      writeSyncLog(`[Sync] Processed batch of ${chunk.length} companies. Current total: ${processedCount}`, onProgress);
     }
 
     // 6. Firestore-да бар, бірақ API-де жоқ мекемелерді өшіру
@@ -414,14 +293,14 @@ export async function runSync(force: boolean = false, onProgress?: (msg: string)
     console.log(`\n🎉 Синхрондау сәтті аяқталды!`);
     console.log(`⏭️ Өткізілгені (өзгеріссіз): ${skipCount}`);
     console.log(`➕ Жаңадан қосылғаны: ${addCount}`);
-    console.log(`🔄 Жаңартылғаны (векторланды): ${updateCount}`);
+    console.log(`🔄 Жаңартылғаны: ${updateCount}`);
     console.log(`🗑️ Өшірілгені: ${deleteCount}`);
 
     if (onProgress) {
       onProgress(`\n🎉 Синхрондау сәтті аяқталды!\n` +
         `⏭️ Өткізілгені (өзгеріссіз): ${skipCount}\n` +
         `➕ Жаңадан қосылғаны: ${addCount}\n` +
-        `🔄 Жаңартылғаны (векторланды): ${updateCount}\n` +
+        `🔄 Жаңартылғаны: ${updateCount}\n` +
         `🗑️ Өшірілгені: ${deleteCount}\n`
       );
     }

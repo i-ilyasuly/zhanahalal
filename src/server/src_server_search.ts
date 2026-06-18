@@ -5,7 +5,7 @@ import path from "path";
 import { FieldValue } from "firebase-admin/firestore";
 import { CACHE, loadCache, db } from "./src_server_db.js";
 import { escapeHTML, getDistance } from "./src_server_utils.js";
-import { ai, GEMINI_EMBEDDING_MODEL, getQueryEmbeddingVertex } from "./src_server_aiClient.js";
+import { ai } from "./src_server_aiClient.js";
 
 type MatchConfidence = "exact" | "fuzzy" | "none";
 
@@ -18,23 +18,6 @@ function writeBotLog(text: string) {
   } catch (e) {
     console.error("Failed to write bot log in search:", e);
   }
-}
-
-async function getQueryEmbedding(text: string): Promise<number[] | null> {
-  const cleaned = text.trim();
-  if (!cleaned) return null;
-  try {
-    const values = await getQueryEmbeddingVertex(cleaned);
-    if (values) {
-      return values;
-    }
-  } catch (err: any) {
-    writeBotLog(`⚠️ Query embedding error: ${err.message || String(err)}`);
-    if (err.stack) {
-      writeBotLog(`Stack: ${err.stack}`);
-    }
-  }
-  return null;
 }
 
 // ── PYTHON-BASED TEXT CLEANING AND VARIANT GENERATION ──
@@ -54,13 +37,44 @@ export function cleanTextPython(text: string): string {
   return s.replace(/[^a-z0-9\u0400-\u04FF]/gi, "");
 }
 
+export function simplifyCyrillic(text: string): string {
+  if (!text) return "";
+  let s = text.toLowerCase();
+  const replacements: Record<string, string> = {
+    'ә': 'а',
+    'і': 'и',
+    'ң': 'н',
+    'ғ': 'г',
+    'ү': 'у',
+    'ұ': 'у',
+    'қ': 'к',
+    'ө': 'о',
+    'һ': 'х'
+  };
+  for (const [k, v] of Object.entries(replacements)) {
+    s = s.split(k).join(v);
+  }
+  return s;
+}
+
+export function cleanForSearch(text: string): string {
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0400-\u04FF\s]/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function getVariants(text: string): string[] {
   const s = text.toLowerCase();
   const cyr2lat: Record<string, string> = {
     'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z',
     'и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r',
     'с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'c','ч':'ch','ш':'sh','щ':'sh',
-    'ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya','қ':'q'
+    'ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya','қ':'q',
+    // Kazakh Cyrillic Specific Letters
+    'ә':'a','і':'i','ң':'n','ғ':'g','ү':'u','ұ':'u','ө':'o','һ':'h'
   };
   let latinVariant = "";
   for (const char of s) {
@@ -69,91 +83,72 @@ export function getVariants(text: string): string[] {
   return [s, latinVariant];
 }
 
-function isSubstringMatch(queryClean: string, titleClean: string): MatchConfidence {
-  if (!titleClean.includes(queryClean)) {
-    return 'none';
-  }
-  if (titleClean.startsWith(queryClean)) {
-    return 'exact';
-  }
-  const coverage = queryClean.length / titleClean.length;
-  if (coverage >= 0.6) {
-    return 'exact';
-  }
-  return 'fuzzy';
-}
-
 export function isMatch(queryText: string, title: string): MatchConfidence {
   if (!title || !queryText) return 'none';
 
-  const variants = getVariants(queryText);
-  const tClean = cleanTextPython(title);
+  const qClean = cleanForSearch(queryText);
+  const tClean = cleanForSearch(title);
 
-  // ── 1. ТІКЕЛЕЙ SUBSTRING ТЕКСЕРУ ─────────────────────────────────────
-  for (const varStr of variants) {
-    const vClean = cleanTextPython(varStr);
-    if (vClean.length >= 2) {
-      const result = isSubstringMatch(vClean, tClean);
-      if (result !== 'none') {
-        return result;
+  if (!qClean || !tClean) return 'none';
+
+  // 1. Тікелей дәл келу немесе толық substring келу
+  if (tClean === qClean) return 'exact';
+  if (tClean.includes(qClean)) return 'exact';
+
+  // 2. Транслитерация арқылы тексеру
+  const qLat = getVariants(qClean)[1];
+  const tLat = getVariants(tClean)[1];
+  if (tLat === qLat) return 'exact';
+  if (tLat.includes(qLat)) return 'exact';
+
+  // 3. Жеңілдетілген кириллица арқылы тексеру (ә -> а, і -> и т.б.)
+  const qSimp = simplifyCyrillic(qClean);
+  const tSimp = simplifyCyrillic(tClean);
+  if (tSimp === qSimp) return 'exact';
+  if (tSimp.includes(qSimp)) return 'exact';
+
+  // 4. Сөздік-сөздік деңгейде тексеру (мысалы, "mad burge" -> "Madi Burger")
+  const qWords = qClean.split(' ').filter(w => w.length >= 2);
+  const tWords = tClean.split(' ').filter(w => w.length >= 2);
+
+  if (qWords.length === 0 || tWords.length === 0) return 'none';
+
+  const qLatWords = qLat.split(' ').filter(w => w.length >= 2);
+  const tLatWords = tLat.split(' ').filter(w => w.length >= 2);
+
+  const qSimpWords = qSimp.split(' ').filter(w => w.length >= 2);
+  const tSimpWords = tSimp.split(' ').filter(w => w.length >= 2);
+
+  let allWordsMatched = true;
+  for (let i = 0; i < qWords.length; i++) {
+    const qw = qWords[i];
+    const qwLat = qLatWords[i] || qw;
+    const qwSimp = qSimpWords[i] || qw;
+
+    let wordMatched = false;
+    for (let j = 0; j < tWords.length; j++) {
+      const tw = tWords[j];
+      const twLat = tLatWords[j] || tw;
+      const twSimp = tSimpWords[j] || tw;
+
+      if (
+        tw.includes(qw) ||
+        twLat.includes(qwLat) ||
+        twSimp.includes(qwSimp)
+      ) {
+        wordMatched = true;
+        break;
       }
     }
 
-    // Partial ratio
-    if (fuzz.partial_ratio(varStr, title.toLowerCase()) >= 50) {
-      return 'exact';
+    if (!wordMatched) {
+      allWordsMatched = false;
+      break;
     }
   }
 
-  // ── 2. СӨЗ БОЙЫНША ТЕКСЕРУ ───────────────────────────────────────────
-  const stopWords = new Set([
-    'халал', 'харам', 'рұқсат', 'ма', 'ме', 'ба', 'бе', 'па', 'пе',
-    'деген', 'қандай', 'осы', 'точно', 'күдікті', 'емес',
-    'өнім', 'оним', 'onim', 'тамақ', 'азық', 'дүкен', 'дукен',
-    'мекеме', 'өндіруші', 'сұрайын', 'айтшы', 'білгім', 'келеді',
-    'жолы', 'бұлай', 'деген', 'жазады', 'жазды', 'сенен', 'маған',
-    'қалай', 'калай', 'жағдай', 'жагдай', 'жағдайыңыз', 'жагдайыныз',
-    'аман', 'сау', 'сәлем', 'салем', 'привет', 'кім', 'ким', 'неге',
-    'қалайсың', 'қалайсыз', 'қалайсын', 'рақмет', 'рахмет'
-  ]);
-  
-  const rawWords = queryText.toLowerCase().replace(/-/g, ' ').split(/\s+/);
-  const words = rawWords.filter(w => w.length >= 2 && !stopWords.has(w));
-
-  for (const word of words) {
-    const wVariants = getVariants(word);
-    for (const wVar of wVariants) {
-      const wClean = cleanTextPython(wVar);
-      if (wClean.length >= 2) {
-        const result = isSubstringMatch(wClean, tClean);
-        if (result !== 'none') {
-          return result;
-        }
-      }
-      if (fuzz.partial_ratio(wVar, title.toLowerCase()) >= 50) {
-        return 'exact';
-      }
-    }
-  }
-
-  // ── 3. ЖАЛПЫ ҰҚСАСТЫҚ (ratio) ────────────────────────────────────────
-  for (const varStr of variants) {
-    const vClean = cleanTextPython(varStr);
-    const r = fuzz.ratio(vClean, tClean);
-    if (r >= 85) return 'exact';
-    if (r >= 50) return 'fuzzy';
-  }
-
-  for (const word of words) {
-    const wVariants = getVariants(word);
-    for (const wVar of wVariants) {
-      const wClean = cleanTextPython(wVar);
-      if (wClean.length >= 2) {
-        const r = fuzz.ratio(wClean, tClean);
-        if (r >= 83) return 'exact';
-        if (r >= 50) return 'fuzzy';
-      }
-    }
+  if (allWordsMatched) {
+    return 'fuzzy';
   }
 
   return 'none';
@@ -338,57 +333,7 @@ export async function searchData(semanticQuery?: string, brandName?: string, cit
     writeBotLog(`⏭️ [E-Code search skipped] Query contains company or city keywords.`);
   }
 
-  // ── 2. МЕКЕМЕЛЕР ГИБРИДТІ ІЗДЕУ (HYBRID SEMANTIC + FUZZY SEARCH) ───────────
-  let vectorResults: any[] = [];
-  const isTesting = typeof process.env.VITEST !== "undefined" || process.env.NODE_ENV === "test";
-  
-  if (!isTesting) {
-    try {
-      writeBotLog(`📡 [Vector Search] Ембеддинг жасалуда: "${processedQuery}"...`);
-      const queryVector = await getQueryEmbedding(processedQuery);
-      if (queryVector && queryVector.length > 0) {
-        writeBotLog(`Embedding generated successfully. Vector length: ${queryVector.length}`);
-        
-        const wrappedQueryVector = FieldValue.vector(queryVector);
-
-        writeBotLog(`📡 [Vector Search] Firestore-дан findNearest іздеуі іске қосылуда...`);
-        const vectorQuery = db.collection('search_companies')
-          .findNearest({
-            vectorField: 'search_fields.embedding',
-            queryVector: wrappedQueryVector,
-            distanceMeasure: 'COSINE',
-            limit: 10
-          });
-        const vectorSnapshot = await vectorQuery.get();
-        writeBotLog(`📡 [Vector Search] Firestore findNearest сәтті аяқталды. Табылған құжат саны: ${vectorSnapshot.docs.length}`);
-
-        for (const doc of vectorSnapshot.docs) {
-          const data = doc.data();
-          if (data.is_active === false) continue;
-          
-          vectorResults.push({
-            ...data,
-            id: doc.id,
-            type: "Meкеме",
-            title: data.title || "",
-            semanticMatch: true,
-            _titleStr: data.title || ""
-          });
-        }
-      } else {
-        writeBotLog("⚠️ Embedding returned null or empty vector.");
-      }
-    } catch (err: any) {
-      writeBotLog(`FIRESTORE VECTOR SEARCH ERROR DETECTED: ${err.message || String(err)}`);
-      if (err.stack) {
-        console.error(err.stack);
-      }
-      throw err;
-    }
-  } else {
-    writeBotLog(`⏭️ [Vector Search] Skipped vector search because we are in a Vitest test session.`);
-  }
-
+  // ── 2. МЕКЕМЕЛЕРДІ МӘТІН ТҮРІНДЕ ІЗДЕУ (KEYWORD & FUZZY SEARCH) ───────────
   const fuzzyResults: any[] = [];
   for (const c of CACHE.companies) {
     if (c.is_active === false) continue;
@@ -414,27 +359,32 @@ export async function searchData(semanticQuery?: string, brandName?: string, cit
   const mergedMap = new Map<string, any>();
 
   for (const fr of fuzzyResults) {
+    let baseScore = 50;
+    const qClean = cleanForSearch(queryText);
+    const tClean = cleanForSearch(fr.title);
+
+    if (fr.confidence === "exact") {
+      if (tClean === qClean) {
+        baseScore = 200;
+      } else if (tClean.startsWith(qClean)) {
+        baseScore = 150;
+      } else {
+        baseScore = 100;
+      }
+    } else {
+      baseScore = 50;
+    }
+
+    const cert = String(fr.certificate_status || "").trim().toLowerCase();
+    if (cert === 'active' || cert.includes('белсенді') || cert.includes('актив')) {
+      baseScore += 10;
+    }
+
     mergedMap.set(String(fr.id), {
       ...fr,
-      score: fr.confidence === "exact" ? 80 : 40,
+      score: baseScore,
       fuzzyMatched: true
     });
-  }
-
-  for (const vr of vectorResults) {
-    const idStr = String(vr.id);
-    const existing = mergedMap.get(idStr);
-    if (existing) {
-      existing.score = 100;
-      existing.semanticMatched = true;
-    } else {
-      mergedMap.set(idStr, {
-        ...vr,
-        score: 60,
-        semanticMatched: true,
-        confidence: "fuzzy"
-      });
-    }
   }
 
   let combinedCompanies = Array.from(mergedMap.values());

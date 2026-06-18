@@ -23,8 +23,7 @@ async function runMigration() {
       search_fields: {
         synonyms: [],
         ai_description: "",
-        tags: [],
-        embedding: [] // For later Vector Search
+        tags: []
       }
     });
     count++;
@@ -50,8 +49,7 @@ async function runMigration() {
       search_fields: {
         synonyms: [],
         ai_description: "",
-        tags: [],
-        embedding: []
+        tags: []
       }
     });
     count++;

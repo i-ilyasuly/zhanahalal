@@ -57,7 +57,7 @@ export async function autoRenameTopic(
 Жауап: "${finalAnswer}"`;
 
     const res = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-flash-lite-latest',
       contents: prompt
     });
 

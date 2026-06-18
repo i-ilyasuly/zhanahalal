@@ -93,14 +93,57 @@ if (fs.existsSync(serviceAccountPath)) {
 const saProjectId = 'momyn-t1'; 
 const location = 'us-central1';
 
-// Initialize the modern Vertex AI Client via `@google/genai`
-export const aiClient = new GoogleGenAI({
+// Maps legacy Gemini models to valid Vertex AI model tags
+function mapModelForVertex(modelName: string): string {
+  const name = String(modelName || '').toLowerCase();
+  if (name.includes('pro')) {
+    return 'gemini-2.5-pro';
+  }
+  // gemini-flash-lite-latest is mapped to gemini-2.5-flash to ensure robust us-central1 call support on Vertex AI
+  return 'gemini-2.5-flash';
+}
+
+const rawAiClient = new GoogleGenAI({
   vertexai: true,
   project: saProjectId,
   location: location,
 });
 
-console.log(`[🚀] GoogleGenAI Client initialized in Vertex AI mode. Project: ${saProjectId}, Location: ${location}`);
+// A handler that wraps objects recursively to intercept arguments of functions where "model" property might exist
+function wrapWithModelMapping(target: any): any {
+  if (target === null || (typeof target !== 'object' && typeof target !== 'function')) {
+    return target;
+  }
+  
+  // Do not wrap Promise objects to prevent breaking native JS await mechanisms
+  if (target instanceof Promise || typeof target.then === 'function') {
+    return target;
+  }
+  
+  return new Proxy(target, {
+    get(obj, prop) {
+      if (prop === 'then' && typeof obj.then !== 'function') {
+        return undefined; // Avoid blocking promises if they look up .then
+      }
+      const val = Reflect.get(obj, prop);
+      if (typeof val === 'function') {
+        return function(this: any, ...args: any[]) {
+          // If the arguments contain a model property, we map it
+          if (args.length > 0 && args[0] && typeof args[0] === 'object' && 'model' in args[0]) {
+            args[0].model = mapModelForVertex(args[0].model);
+          }
+          const result = val.apply(obj, args);
+          return wrapWithModelMapping(result);
+        };
+      }
+      return wrapWithModelMapping(val);
+    }
+  });
+}
+
+export const aiClient = wrapWithModelMapping(rawAiClient);
+
+console.log(`[🚀] GoogleGenAI Client initialized in Vertex AI mode with Transparent Model Mapping. Project: ${saProjectId}, Location: ${location}`);
 
 // Normalizes input to Vertex AI format
 function normalizeContents(contents: any): any[] {
@@ -133,18 +176,6 @@ function normalizeContents(contents: any): any[] {
   return [];
 }
 
-// Maps legacy Gemini models to valid Vertex AI model tags
-function mapModelForVertex(modelName: string): string {
-  const name = String(modelName || '').toLowerCase();
-  if (name.includes('embed')) {
-    return 'gemini-embedding-2-preview';
-  }
-  if (name.includes('pro')) {
-    return 'gemini-2.5-pro';
-  }
-  return 'gemini-2.5-flash';
-}
-
 /**
  * Compatible wrapper class for old "ai" object
  */
@@ -152,7 +183,7 @@ export const ai = {
   models: {
     generateContent: async function(args: any) {
       try {
-        const vertexModel = mapModelForVertex(args.model || 'gemini-2.5-flash');
+        const vertexModel = mapModelForVertex(args.model || 'gemini-flash-lite-latest');
         const contents = normalizeContents(args.contents);
         
         const response = await aiClient.models.generateContent({
@@ -173,7 +204,7 @@ export const ai = {
 
     generateContentStream: async function(args: any) {
       try {
-        const vertexModel = mapModelForVertex(args.model || 'gemini-2.5-flash');
+        const vertexModel = mapModelForVertex(args.model || 'gemini-flash-lite-latest');
         const contents = normalizeContents(args.contents);
 
         const responseStream = await aiClient.models.generateContentStream({
@@ -196,21 +227,6 @@ export const ai = {
         console.error("Vertex AI generateContentStream error:", err);
         throw err;
       }
-    },
-
-    embedContent: async function(args: any) {
-      const fetchFn = async () => {
-        const vertexModel = mapModelForVertex(args.model || 'gemini-embedding-2');
-        const res = await aiClient.models.embedContent({
-          model: vertexModel,
-          contents: args.contents,
-          config: args.config || { outputDimensionality: 1536 }
-        });
-        return {
-          embeddings: res.embeddings || []
-        };
-      };
-      return retryWithBackoff(fetchFn);
     }
   }
 };
@@ -256,80 +272,5 @@ export async function retryWithBackoff<T>(fn: () => Promise<T>, retries: number 
   }
 }
 
-/**
- * Official Vertex AI Document embedding helper for Company Sync process (Supports multimodal inputs)
- */
-export async function getDocumentEmbedding(
-  text: string,
-  image?: { data: string; mimeType: string } | null
-): Promise<number[]> {
-  const fetchFn = async () => {
-    // ЖАТТАП АЛУҒА: Қандай жағдай болса да ТЕК ҚАНА gemini-embedding-2 қолданылсын (Vertex-те ол 'gemini-embedding-2-preview' деп аталады).
-    const requestedModel = 'gemini-embedding-2-preview';
-
-    let contentParts: any;
-    if (image) {
-      contentParts = [
-        { text: text },
-        {
-          inlineData: {
-            mimeType: image.mimeType,
-            data: image.data
-          }
-        }
-      ];
-    } else {
-      contentParts = text;
-    }
-
-    const res = await aiClient.models.embedContent({
-      model: requestedModel,
-      contents: contentParts,
-      config: {
-        outputDimensionality: 1536
-      }
-    });
-
-    const values = res.embeddings?.[0]?.values || [];
-    if (!values || values.length === 0) {
-       throw new Error("No values in embedding response");
-    }
-
-    return values;
-  };
-
-  return retryWithBackoff(fetchFn);
-}
-
-/**
- * Official Vertex AI Query embedding helper for Search/Querying process
- */
-export async function getQueryEmbeddingVertex(text: string): Promise<number[] | null> {
-  const fetchFn = async () => {
-    // ЖАТТАП АЛУҒА: Қандай жағдай болса да ТЕК ҚАНА gemini-embedding-2 қолданылсын.
-    const requestedModel = 'gemini-embedding-2-preview';
-    const res = await aiClient.models.embedContent({
-      model: requestedModel,
-      contents: text,
-      config: {
-        outputDimensionality: 1536
-      }
-    });
-
-    const values = res.embeddings?.[0]?.values || null;
-    if (!values || values.length === 0) return null;
-
-    return values;
-  };
-
-  try {
-    return await retryWithBackoff(fetchFn);
-  } catch (err: any) {
-    console.error("❌ getQueryEmbeddingVertex Vertex AI error:", err?.message || err);
-    return null;
-  }
-}
-
-export const GEMINI_EMBEDDING_MODEL = 'gemini-embedding-2';
-export const GEMINI_GENERATION_MODEL = 'gemini-2.5-flash';
-export const GEMINI_INTENT_MODEL = 'gemini-2.5-flash';
+export const GEMINI_GENERATION_MODEL = 'gemini-flash-lite-latest';
+export const GEMINI_INTENT_MODEL = 'gemini-flash-lite-latest';

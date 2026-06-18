@@ -34,11 +34,19 @@ export async function streamTextToTelegram(ctx: any, draftId: number, fullText: 
     const safeContent = closeHTMLTags(content);
 
     // 1. Send native draft progress (smooth feel)
+    const decodeHTML = (html: string) => {
+      let txt = html.replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'")
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&');
+      return txt;
+    };
     await ctx.telegram.callApi('sendMessageDraft' as any, {
       chat_id: ctx.chat.id,
       message_thread_id,
       draft_id: draftId,
-      text: safeContent,
+      text: decodeHTML(safeContent),
       parse_mode: 'HTML'
     }).catch((e: any) => {
       console.warn("⚠️ sendMessageDraft stream error:", e.message || e);

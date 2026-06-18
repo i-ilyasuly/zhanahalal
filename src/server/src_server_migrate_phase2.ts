@@ -46,7 +46,6 @@ async function runPhase2() {
       short_description: data.desc || "",
       description_clean: data.desc || "",
       tags: data.search_fields?.tags || [],
-      embedding: data.search_fields?.embedding || [],
       is_active: true,
 
       // Certificate Info
