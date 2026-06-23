@@ -295,8 +295,8 @@ export async function searchData(semanticQuery?: string, brandName?: string, cit
   const results: any[] = [];
 
   // ── 1. E-КОД ІЗДЕУ ───────────────────────────────────────────────────────
-  if (!hasCompanyOrCityKeywords(queryText)) {
-    const [eBase, eVariant] = parseECode(queryText);
+  if (!hasCompanyOrCityKeywords(processedQuery)) {
+    const [eBase, eVariant] = parseECode(processedQuery);
     if (eBase) {
       writeBotLog(`🧪 [E-Code Match] E-код табылды: ${eBase}`);
       for (const i of CACHE.ingredients) {
@@ -344,7 +344,7 @@ export async function searchData(semanticQuery?: string, brandName?: string, cit
     const searchField = `${title} ${aliases} ${tags}`.trim() || legal;
     if (!searchField) continue;
 
-    const conf = isMatch(queryText, searchField);
+    const conf = isMatch(processedQuery, searchField);
     if (conf !== "none") {
       fuzzyResults.push({ 
         ...c, 
@@ -360,7 +360,7 @@ export async function searchData(semanticQuery?: string, brandName?: string, cit
 
   for (const fr of fuzzyResults) {
     let baseScore = 50;
-    const qClean = cleanForSearch(queryText);
+    const qClean = cleanForSearch(processedQuery);
     const tClean = cleanForSearch(fr.title);
 
     if (fr.confidence === "exact") {
@@ -444,7 +444,7 @@ export async function searchData(semanticQuery?: string, brandName?: string, cit
   }
 
   // ── 3. ҚОСПАЛАР ІЗДЕУ ───────────────────────────────────────────────────
-  if (isStrictIngredientQuery(queryText) && !hasCompanyOrCityKeywords(queryText)) {
+  if (isStrictIngredientQuery(processedQuery) && !hasCompanyOrCityKeywords(processedQuery)) {
     console.log(`🧪 [Ingredients Search] Қоспаларды іздеу басталуда...`);
     for (const i of CACHE.ingredients) {
       if (i.is_active === false) continue;
@@ -454,8 +454,8 @@ export async function searchData(semanticQuery?: string, brandName?: string, cit
       const aliases = Array.isArray(i.aliases) ? i.aliases.join(" ") : "";
       const searchName = `${name} ${nameRu} ${aliases}`.trim();
 
-      const confTitle = title ? isMatch(queryText, title) : 'none';
-      const confName = searchName ? isMatch(queryText, searchName) : 'none';
+      const confTitle = title ? isMatch(processedQuery, title) : 'none';
+      const confName = searchName ? isMatch(processedQuery, searchName) : 'none';
 
       let confidence: MatchConfidence = 'none';
       if (confTitle === 'exact' || confName === 'exact') {

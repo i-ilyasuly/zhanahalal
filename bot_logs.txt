@@ -1183,3 +1183,125 @@ Stack: ApiError: {"error":{"code":404,"message":"Publisher Model `projects/momyn
 --- 🔍 [Search Diagnostic Start] ---
 [2026-06-17T08:40:53.992Z] [searchData] Raw Query: "Кармин", City: "undefined"
 [2026-06-17T08:40:53.992Z] [searchData] Processed Query: "кармин"
+[2026-06-23T16:51:52.406Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-23T16:51:54.316Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-23T16:51:54.613Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-23T16:51:54.613Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-23T16:51:59.162Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-23T16:52:13.144Z] ⏳ [Sync Batch] Топ 1 / 2 (100 / 132 мекеме)...
+[2026-06-23T16:52:14.606Z] 📩 Incoming message from Damuhalal for direct search: "NAN"
+[2026-06-23T16:52:14.681Z] [Sync] Processed batch of 100 companies. Current total: 100
+[2026-06-23T16:52:14.681Z] ⏳ [Sync Batch] Топ 2 / 2 (32 / 132 мекеме)...
+[2026-06-23T16:52:15.286Z] [Sync] Processed batch of 32 companies. Current total: 132
+[2026-06-23T16:52:15.428Z] [Direct Search] Executing searchData for query "NAN"
+[2026-06-23T16:52:15.429Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:52:15.429Z] [searchData] Raw Query: "NAN", City: "undefined"
+[2026-06-23T16:52:15.429Z] [searchData] Processed Query: "nan"
+[2026-06-23T16:53:54.822Z] 📩 Incoming message from Damuhalal for direct search: "nan деген халал ма өзііі"
+[2026-06-23T16:53:55.616Z] [Direct Search] Executing searchData for query "nan деген халал ма өзііі"
+[2026-06-23T16:53:55.617Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:53:55.617Z] [searchData] Raw Query: "nan деген халал ма өзііі", City: "undefined"
+[2026-06-23T16:53:55.617Z] [searchData] Processed Query: "nan өзііі"
+[2026-06-23T16:54:13.457Z] 📩 Incoming message from Damuhalal for direct search: "[fyb"
+[2026-06-23T16:54:14.255Z] [Direct Search] Executing searchData for query "[fyb"
+[2026-06-23T16:54:14.255Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:54:14.255Z] [searchData] Raw Query: "[fyb", City: "undefined"
+[2026-06-23T16:54:14.255Z] [searchData] Processed Query: "[fyb"
+[2026-06-23T16:54:22.465Z] 📩 Incoming message from Damuhalal for direct search: "hani"
+[2026-06-23T16:54:23.480Z] [Direct Search] Executing searchData for query "hani"
+[2026-06-23T16:54:23.480Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:54:23.480Z] [searchData] Raw Query: "hani", City: "undefined"
+[2026-06-23T16:54:23.480Z] [searchData] Processed Query: "hani"
+[2026-06-23T16:55:31.364Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:55:31.364Z] [searchData] Raw Query: "Madi Burger", City: "undefined"
+[2026-06-23T16:55:31.365Z] [searchData] Processed Query: "madi burger"
+[2026-06-23T16:55:31.369Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:55:31.369Z] [searchData] Raw Query: "Inactive Cafe", City: "undefined"
+[2026-06-23T16:55:31.369Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-23T16:55:31.371Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:55:31.371Z] [searchData] Raw Query: "mad burge", City: "undefined"
+[2026-06-23T16:55:31.371Z] [searchData] Processed Query: "mad burge"
+[2026-06-23T16:55:31.372Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:55:31.372Z] [searchData] Raw Query: "E120", City: "undefined"
+[2026-06-23T16:55:31.372Z] [searchData] Processed Query: "e120"
+[2026-06-23T16:55:31.372Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-23T16:55:31.373Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-23T16:55:31.373Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-23T16:55:31.374Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:55:31.374Z] [searchData] Raw Query: "120", City: "undefined"
+[2026-06-23T16:55:31.374Z] [searchData] Processed Query: "120"
+[2026-06-23T16:55:31.375Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:55:31.375Z] [searchData] Raw Query: "Кармин", City: "undefined"
+[2026-06-23T16:55:31.376Z] [searchData] Processed Query: "кармин"
+[2026-06-23T16:57:58.939Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:57:58.939Z] [searchData] Raw Query: "Madi Burger", City: "undefined"
+[2026-06-23T16:57:58.940Z] [searchData] Processed Query: "madi burger"
+[2026-06-23T16:57:58.944Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:57:58.945Z] [searchData] Raw Query: "Inactive Cafe", City: "undefined"
+[2026-06-23T16:57:58.945Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-23T16:57:58.946Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:57:58.946Z] [searchData] Raw Query: "mad burge", City: "undefined"
+[2026-06-23T16:57:58.947Z] [searchData] Processed Query: "mad burge"
+[2026-06-23T16:57:58.948Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:57:58.948Z] [searchData] Raw Query: "E120", City: "undefined"
+[2026-06-23T16:57:58.948Z] [searchData] Processed Query: "e120"
+[2026-06-23T16:57:58.949Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-23T16:57:58.949Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-23T16:57:58.949Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-23T16:57:58.950Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:57:58.950Z] [searchData] Raw Query: "120", City: "undefined"
+[2026-06-23T16:57:58.950Z] [searchData] Processed Query: "120"
+[2026-06-23T16:57:58.952Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T16:57:58.952Z] [searchData] Raw Query: "Кармин", City: "undefined"
+[2026-06-23T16:57:58.952Z] [searchData] Processed Query: "кармин"
+[2026-06-23T16:58:53.068Z] [Startup] Bot launch attempt. Token: 868816...wC3E
+[2026-06-23T16:58:54.557Z] [Startup] Old webhook deleted. Fetching Bot details before launch...
+[2026-06-23T16:58:54.787Z] [Startup] Bot identity verified: @HalalDamuTestBot (8688166376)
+[2026-06-23T16:58:54.788Z] [Startup] Telegram Bot successfully launched in background long-polling mode.
+[2026-06-23T16:58:59.187Z] 🚀 HalalDamu API арқылы мекемелерді жаңарту басталды... (force: false)
+[2026-06-23T17:08:27.311Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T17:08:27.312Z] [searchData] Raw Query: "Madi Burger", City: "undefined"
+[2026-06-23T17:08:27.312Z] [searchData] Processed Query: "madi burger"
+[2026-06-23T17:08:27.317Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T17:08:27.317Z] [searchData] Raw Query: "Inactive Cafe", City: "undefined"
+[2026-06-23T17:08:27.317Z] [searchData] Processed Query: "inactive cafe"
+[2026-06-23T17:08:27.319Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T17:08:27.319Z] [searchData] Raw Query: "mad burge", City: "undefined"
+[2026-06-23T17:08:27.319Z] [searchData] Processed Query: "mad burge"
+[2026-06-23T17:08:27.320Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T17:08:27.321Z] [searchData] Raw Query: "E120", City: "undefined"
+[2026-06-23T17:08:27.321Z] [searchData] Processed Query: "e120"
+[2026-06-23T17:08:27.321Z] [searchData] 🧪 [E-Code Match] E-код табылды: e120
+[2026-06-23T17:08:27.321Z] [searchData] 🧪 [E-Code Results] 1 қоспа табылды.
+[2026-06-23T17:08:27.321Z] [searchData] --- 🔍 [Search Diagnostic End] ---
+
+[2026-06-23T17:08:27.322Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T17:08:27.322Z] [searchData] Raw Query: "120", City: "undefined"
+[2026-06-23T17:08:27.323Z] [searchData] Processed Query: "120"
+[2026-06-23T17:08:27.324Z] [searchData] 
+--- 🔍 [Search Diagnostic Start] ---
+[2026-06-23T17:08:27.325Z] [searchData] Raw Query: "Кармин", City: "undefined"
+[2026-06-23T17:08:27.325Z] [searchData] Processed Query: "кармин"

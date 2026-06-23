@@ -274,6 +274,13 @@ export async function runSync(force: boolean = false, onProgress?: (msg: string)
 
     for (const existingId of existingMap.keys()) {
       if (!apiIds.has(existingId)) {
+        // Тек цифрлардан тұратын ID-лерді ғана өшіреміз (яғни WordPress-тен келгендерді).
+        // Қолдан немесе тест үшін жасалған (әріптері бар) ID-лерді ешқашан өшірмейміз!
+        if (!/^\d+$/.test(existingId)) {
+          console.log(`⚠️ [PRESERVE] Қолмен жасалған немесе тесттік мекеме сақталды (ID: ${existingId})`);
+          continue;
+        }
+
         console.log(`🗑️ [DELETE] API-де табылған жоқ, өшірілуде: ID ${existingId}`);
         const docRef = db.collection("search_companies").doc(existingId);
         deleteBatch.delete(docRef);

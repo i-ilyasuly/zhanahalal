@@ -12,8 +12,8 @@ export async function autoRenameTopic(
 ) {
   if (!threadId || !ctx.chat?.id) return;
   
-  if (ctx.chat?.type !== 'private') {
-    return; // Don't manage or rename topics in group chats/channels
+  if (ctx.chat?.type === 'private') {
+    return; // Topics do not exist in private chats
   }
   
   if (intent === 'chat') {

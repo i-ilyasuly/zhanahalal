@@ -35,13 +35,15 @@ export async function sendResultWithPhoto(ctx: MyContext, result: any, text: str
     photoUrl = extractImgUrl(result.photos[0]);
   }
 
-  // Determine effect based on status
+  // Determine effect based on status (Message effects are strictly only allowed in private 1-on-1 chats)
   const category = getQuoteCategory(result);
   let effectId = "";
-  if (category === "halal") {
-    effectId = "5046509860389126442"; // 🎉 Confetti
-  } else if (category === "expired" || category === "haram") {
-    effectId = "5104841245755180586"; // 🔥 Fire
+  if (ctx.chat?.type === 'private') {
+    if (category === "halal") {
+      effectId = "5046509860389126442"; // 🎉 Confetti
+    } else if (category === "expired" || category === "haram") {
+      effectId = "5104841245755180586"; // 🔥 Fire
+    }
   }
 
   const opts = {
@@ -61,8 +63,11 @@ export async function sendResultWithPhoto(ctx: MyContext, result: any, text: str
       await ctx.reply(text, opts);
     }
   } catch (err: any) {
-    if (err?.response?.error_code === 400 && err?.response?.description?.includes('EFFECT_ID_INVALID')) {
-      console.warn("⚠️ Invalid message effect ID, retrying without effect...");
+    const hasEffect = !!opts.message_effect_id;
+    const isEffectError = err?.response?.description?.toLowerCase().includes('effect') || err?.message?.toLowerCase().includes('effect');
+    
+    if (hasEffect && (err?.response?.error_code === 400 || isEffectError)) {
+      console.warn("⚠️ Message effect error, retrying without effect...", err.message || err);
       delete opts.message_effect_id;
       
       try {

@@ -21,7 +21,7 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS && process.env.GOOGLE_APPLICATION
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-import { loadCache } from "./src/server/src_server_db.js";
+import { loadCache, CACHE } from "./src/server/src_server_db.js";
 import { bot } from "./src/server/src_server_bot.js";
 import { searchData } from "./src/server/src_server_search.js";
 import { runSync, lastSyncError } from "./src/server/src_server_scripts_sync_companies.js";
@@ -34,13 +34,17 @@ async function startServer() {
   loadCache().then(async () => {
     console.log("📦 Cache pre-loaded.");
     if (process.env.NODE_ENV !== "production") {
-      console.log("🔌 [Startup Sync] Даму кезеңі: бірінші жүктелудегі автоматты синхрондау іске қосылды...");
-      try {
-        await runSync();
-        await loadCache(true);
-        console.log("✅ [Startup Sync] Бірінші синхрондау сәтті аяқталды!");
-      } catch (e) {
-        console.error("❌ [Startup Sync] Бірінші синхрондау барысында қате шықты:", e);
+      if (!CACHE.companies || CACHE.companies.length === 0) {
+        console.log("🔌 [Startup Sync] Дерекқор бос екен. Бірінші рет автоматты синхрондау іске қосылды...");
+        try {
+          await runSync();
+          await loadCache(true);
+          console.log("✅ [Startup Sync] Бірінші синхрондау сәтті аяқталды!");
+        } catch (e) {
+          console.error("❌ [Startup Sync] Бірінші синхрондау барысында қате шықты:", e);
+        }
+      } else {
+        console.log("🔌 [Startup Sync] Деректер бар, автоматты синхрондау өткізілді.");
       }
     }
   }).catch(e => console.error("Initial cache load failed:", e));
